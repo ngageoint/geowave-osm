@@ -20,7 +20,7 @@ install: "mvn -q clean install javadoc:aggregate -Daccumulo.version=${ACCUMULO_V
 script: "mvn -q verify -Daccumulo.version=${ACCUMULO_VERSION} -Dhadoop.version=${HADOOP_VERSION} -Dgeotools.version=${GEOTOOLS_VERSION} -Dgeoserver.version=${GEOSERVER_VERSION}"
 before_install:
   - export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=192m"
-  - mkdir gw; cd gw; git clone --branch v0.8.2  --depth 1 git://github.com/ngageoint/geowave.git; cd geowave-osm; mvn -q clean install -DskipTests=true -DskipITs=true; cd ../..; rm -rf gw;
+  - mkdir gw; cd gw; git clone --branch v0.8.2  --depth 1 git://github.com/ngageoint/geowave.git; cd geowave; mvn -q clean install -DskipTests=true -DskipITs=true; cd ../..; rm -rf gw;
 after_success:
   - mvn coveralls:report -Daccumulo.version=${ACCUMULO_VERSION} -Dhadoop.version=${HADOOP_VERSION} -Dgeotools.version=${GEOTOOLS_VERSION} -Dgeoserver.version=${GEOSERVER_VERSION}
 

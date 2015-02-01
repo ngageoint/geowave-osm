@@ -4,11 +4,11 @@ jdk:
   - oraclejdk7
 env:
   matrix:
-    - ACCUMULO_VERSION='1.5.1'   HADOOP_VERSION='2.0.0-cdh4.7.0'     GEOTOOLS_VERSION='11.2'   GEOSERVER_VERSION='2.5.2'
-    - ACCUMULO_VERSION='1.6.0'   HADOOP_VERSION='2.0.0-cdh4.7.0'     GEOTOOLS_VERSION='11.2'   GEOSERVER_VERSION='2.5.2' 
-    - ACCUMULO_VERSION='1.5.1'   HADOOP_VERSION='2.5.0-cdh5.2.0'     GEOTOOLS_VERSION='11.2'   GEOSERVER_VERSION='2.5.2'
-    - ACCUMULO_VERSION='1.6.0'   HADOOP_VERSION='2.5.0-cdh5.2.0'     GEOTOOLS_VERSION='11.2'   GEOSERVER_VERSION='2.5.2' 	
-    - ACCUMULO_VERSION='1.5.1'   HADOOP_VERSION='2.5.0-cdh5.2.0'     GEOTOOLS_VERSION='12.1'   GEOSERVER_VERSION='2.6.1'
+    #- ACCUMULO_VERSION='1.5.1'   HADOOP_VERSION='2.0.0-cdh4.7.0'     GEOTOOLS_VERSION='11.2'   GEOSERVER_VERSION='2.5.2'
+    #- ACCUMULO_VERSION='1.6.0'   HADOOP_VERSION='2.0.0-cdh4.7.0'     GEOTOOLS_VERSION='11.2'   GEOSERVER_VERSION='2.5.2'
+    #- ACCUMULO_VERSION='1.5.1'   HADOOP_VERSION='2.5.0-cdh5.2.0'     GEOTOOLS_VERSION='11.2'   GEOSERVER_VERSION='2.5.2'
+    #- ACCUMULO_VERSION='1.6.0'   HADOOP_VERSION='2.5.0-cdh5.2.0'     GEOTOOLS_VERSION='11.2'   GEOSERVER_VERSION='2.5.2'
+    #- ACCUMULO_VERSION='1.5.1'   HADOOP_VERSION='2.5.0-cdh5.2.0'     GEOTOOLS_VERSION='12.1'   GEOSERVER_VERSION='2.6.1'
     - ACCUMULO_VERSION='1.6.0'   HADOOP_VERSION='2.5.0-cdh5.2.0'     GEOTOOLS_VERSION='12.1'   GEOSERVER_VERSION='2.6.1' 	
   global:
     #github token
@@ -20,6 +20,7 @@ install: "mvn -q clean install javadoc:aggregate -Daccumulo.version=${ACCUMULO_V
 script: "mvn -q verify -Daccumulo.version=${ACCUMULO_VERSION} -Dhadoop.version=${HADOOP_VERSION} -Dgeotools.version=${GEOTOOLS_VERSION} -Dgeoserver.version=${GEOSERVER_VERSION}"
 before_install:
   - export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=192m"
+  - mkdir gw; cd gw; git clone --branch tags/v0.8.2  --depth 1 git://github.com/ngageoint/geowave-osm.git; cd geowave-osm; mvn -q clean install -DskipTests=true -DskipITs=true; cd ../..; rm -rf gw;
 after_success:
   - mvn coveralls:report -Daccumulo.version=${ACCUMULO_VERSION} -Dhadoop.version=${HADOOP_VERSION} -Dgeotools.version=${GEOTOOLS_VERSION} -Dgeoserver.version=${GEOSERVER_VERSION}
 

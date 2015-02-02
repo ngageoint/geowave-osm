@@ -1,4 +1,4 @@
-package mil.nga.giat.osm;
+package mil.nga.giat.osm.osmfeature;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,12 +35,15 @@ public class OSMFeatureBuilder {
 	private static final List<Range> _ranges = new ArrayList<Range>();
 	
 	public static List<Range> getRanges(){
+		/*
 		if (_ranges.size() == 0){
 			for (Text t : OSMPBFRunner.getRanges()){
 				_ranges.add(new Range(t));
 			}
 		}
 		return _ranges;
+		*/
+		return null;
 	}
 	
 	
@@ -202,16 +205,19 @@ public class OSMFeatureBuilder {
 	}
 	
 	private static Geometry handleWay(Connector conn, String tableName, Map<String, String> tags, Map<String, String> way, Map<String, String> info){
-		String refs = way.get(OSMPBFMapper.wayrefText.toString());
+
+		String refs = "";//way.get(OSMPBFMapper.wayrefText.toString());
+
 		List<Long> allRefs = new ArrayList<Long>();
 		for (String l : refs.split(",")){
 			allRefs.add(Long.parseLong(l));
 		}
+
 		
 		if (allRefs.size() == 0)
 			return null;
 		List<Coordinate> pts = getPoints(allRefs, conn, tableName);
-		
+
 		if (pts == null || pts.size() == 0)
 			return null;
 		
@@ -387,13 +393,13 @@ public class OSMFeatureBuilder {
 			ranges.add(new Range("w_" + way));
 			
 			scan.setRanges(ranges);
-			scan.fetchColumnFamily(OSMPBFMapper.wayText);
+			//scan.fetchColumnFamily(OSMPBFMapper.wayText);
 			//scan.fetchColumnFamily(OSMPBFMapper.wayinfoText);
 			
 			
 			
 			for (Entry<Key, Value> entry : scan ){
-				if (entry.getKey().getColumnFamily().toString().equals(OSMPBFMapper.wayText.toString())) {
+				if (entry.getKey().getColumnFamily().toString().equals("")){//OSMPBFMapper.wayText.toString())) {
 					if (entry.getKey().getColumnQualifier().toString().equals("refs")){
 						String[] srefs = entry.getValue().toString().split(",");
 						for (String s : srefs){
@@ -430,7 +436,7 @@ public class OSMFeatureBuilder {
 				ranges.add(new Range("n_" + i));
 			}
 			scan.setRanges(ranges);
-			scan.fetchColumnFamily(OSMPBFMapper.nodeText);
+			//scan.fetchColumnFamily(OSMPBFMapper.nodeText);
 			
 			String key = "";
 			Double lat = -1.0;

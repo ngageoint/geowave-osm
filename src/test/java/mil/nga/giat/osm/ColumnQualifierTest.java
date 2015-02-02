@@ -1,6 +1,7 @@
-package mil.nga.giat.osm.accumulo.osmschema;
+package mil.nga.giat.osm;
 
 import com.google.common.io.BaseEncoding;
+import mil.nga.giat.osm.accumulo.osmschema.Schema;
 import org.junit.Assert;
 import org.junit.Test;
 

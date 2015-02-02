@@ -13,7 +13,7 @@ public class OSMMain {
 
     public static void main(final String[] args) {
         final OSMCommandArgs osmArgs = new OSMCommandArgs();
-        final JCommander cmd = new JCommander(osmArgs);
+        final JCommander cmd = new JCommander(osmArgs, args);
 
         if (args.length == 0){
             cmd.usage();

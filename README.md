@@ -12,6 +12,7 @@
        alt='Coverage Status' />
 </a>
 
+#Note - this code is not at a fully working state;  a refactor from an older codebase is still in progress
 
 GeoWave-OSM is intended to be a full data + services stack for the OSM ecosystem.
 

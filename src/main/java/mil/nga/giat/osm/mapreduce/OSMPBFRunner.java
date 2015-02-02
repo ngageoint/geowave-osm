@@ -7,8 +7,13 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.accumulo.core.client.Connector;
-import org.apache.accumulo.core.client.ZooKeeperInstance;
+import com.beust.jcommander.JCommander;
+import mil.nga.giat.geowave.accumulo.BasicAccumuloOperations;
+import mil.nga.giat.geowave.accumulo.util.AccumuloUtils;
+import mil.nga.giat.osm.accumulo.osmschema.Schema;
+import org.apache.accumulo.core.client.*;
+import org.apache.accumulo.core.client.admin.TableOperations;
+import org.apache.accumulo.core.client.impl.ConnectorImpl;
 import org.apache.accumulo.core.client.mapreduce.AccumuloOutputFormat;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Mutation;
@@ -19,99 +24,63 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
+public class OSMPBFRunner extends Configured implements Tool {
+    private static final Logger log = LoggerFactory.getLogger(OSMPBFRunner.class);
 
-public class OSMPBFRunner  extends Configured implements Tool {
-	private static final Logger log = Logger.getLogger(OSMPBFRunner.class);
-	
-	public static void main(String[] args) throws Exception {
-		int res = ToolRunner.run(new Configuration(), new OSMPBFRunner(), args);
-		System.exit(res);
-	}
-	
-	public static SortedSet<Text> getRanges(){
-        SortedSet<Text> splits = new TreeSet<Text>();
-        
-        for (String p : new String[] {"n", "w", "r"}){
-	        for (int i = 0; i <= 9; i ++){
-	        	splits.add(new Text(p + "_" + String.valueOf(i)));
-	        }
-        }
-        return splits;
-	}
-	
+    public static void main(String[] args) throws Exception {
+        int res = ToolRunner.run(new Configuration(), new OSMPBFRunner(), args);
+        System.exit(res);
+    }
 
-	@Override
-	public int run(String[] args) throws Exception {
-		
-		String user = "root";
-		String pass = "geowave";
-		String instance = "geowave";
-		String zookeepers = "master.:2181";
-		String tableName = "osm_virginia";
-		String inputSequence = "/osm/stage2";
-		
-		Configuration conf = this.getConf();
-        
-		//job settings
-		Job job = Job.getInstance(conf,"OSM Sequence Import");
-		job.setJarByClass(OSMPBFRunner.class);
-        
-        
-		//input format
-		SequenceFileInputFormat.setInputPaths(job, inputSequence);
+    private void enableLocalityGroups(OSMPBFMapperCommandArgs argv) throws AccumuloSecurityException, AccumuloException, TableNotFoundException {
+        BasicAccumuloOperations bao = new BasicAccumuloOperations(argv.zookeepers,argv.instanceName,argv.user,argv.pass,argv.osmNamespace);
+        bao.createTable(argv.osmTableName);
+
+        bao.addLocalityGroup(argv.osmTableName, Schema.CF.NODE);
+        bao.addLocalityGroup(argv.osmTableName, Schema.CF.NODE_TAG);
+        bao.addLocalityGroup(argv.osmTableName, Schema.CF.WAY);
+        bao.addLocalityGroup(argv.osmTableName, Schema.CF.WAY_TAG);
+        bao.addLocalityGroup(argv.osmTableName, Schema.CF.RELATION);
+        bao.addLocalityGroup(argv.osmTableName, Schema.CF.RELATION_TAG);
+    }
+
+    @Override
+    public int run(String[] args) throws Exception {
+
+        OSMPBFMapperCommandArgs argv = new OSMPBFMapperCommandArgs();
+        JCommander cmd = new JCommander(argv, args);
+        Configuration conf = this.getConf();
+        conf.set("tableName", argv.GetQualifiedTableName());
+        conf.set("osmVisibility", argv.visibility);
+
+        enableLocalityGroups(argv);
+
+        //job settings
+        Job job = Job.getInstance(conf, argv.jobName);
+        job.setJarByClass(OSMPBFRunner.class);
+
+        //input format
+        SequenceFileInputFormat.setInputPaths(job, argv.hdfsSequenceFile);
         job.setInputFormatClass(SequenceFileInputFormat.class);
-        
-        
-        
+
         //mappper
         job.setMapperClass(OSMPBFMapper.class);
-     
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Mutation.class);
         job.setOutputFormatClass(AccumuloOutputFormat.class);
-        AccumuloOutputFormat.setConnectorInfo(job, user, new PasswordToken(pass));
-        AccumuloOutputFormat.setCreateTables(job,true);
-        AccumuloOutputFormat.setDefaultTableName(job, tableName);
-        AccumuloOutputFormat.setZooKeeperInstance(job, instance, zookeepers);
-        
-        //set splits and locality groups
-        ZooKeeperInstance inst = new ZooKeeperInstance(instance, zookeepers, 500);
-        Connector conn = inst.getConnector(user, new PasswordToken(pass));
-        
+        AccumuloOutputFormat.setConnectorInfo(job, argv.user, new PasswordToken(argv.pass));
+        AccumuloOutputFormat.setCreateTables(job, true);
+        AccumuloOutputFormat.setDefaultTableName(job, argv.GetQualifiedTableName());
+        AccumuloOutputFormat.setZooKeeperInstance(job, new ClientConfiguration().withInstance(argv.instanceName).withZkHosts(argv.zookeepers));
 
-        
-        if (!conn.tableOperations().exists(tableName)){
-        	conn.tableOperations().create(tableName);
-        }
-        
-        
-        conn.tableOperations().addSplits(tableName, getRanges());
-        Map<String, Set<Text>> localityGroups = new HashMap<String, Set<Text>>();
-        
-        Set<Text> nodetagColumns = new HashSet<Text>() ;
-        nodetagColumns.add(OSMPBFMapper.nodeTagText);
-        
-        Set<Text> waytagColumns = new HashSet<Text>();
-        waytagColumns.add(OSMPBFMapper.wayTagText);
-        
-        localityGroups.put("nodetags", nodetagColumns);
-        localityGroups.put("waytags", waytagColumns);
-        
-        conn.tableOperations().setLocalityGroups(tableName, localityGroups);
-        
-        
-        
-        
-        
-        
-        
         //reducer
         job.setNumReduceTasks(0);
-        
+
         return job.waitForCompletion(true) ? 0 : -1;
-	}
+    }
 
 }

@@ -1,7 +1,6 @@
 package mil.nga.giat.osm;
 
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,8 +39,8 @@ public class OSMPBFStage {
 		Files.walkFileTree(Paths.get(args.ingestDirectory), new SimpleFileVisitor<java.nio.file.Path>(){
 				@Override
 				public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs) throws IOException{
-					if (file.getFileName().endsWith(arg.extension)) {
-						stageToHadoop(file, arg.hdfsDirectory, conf);
+					if (file.getFileName().toString().endsWith(arg.extension)) {
+						stageToHadoop(file, arg.hdfsSequenceFile, conf);
 					}
 					return FileVisitResult.CONTINUE;
 				}

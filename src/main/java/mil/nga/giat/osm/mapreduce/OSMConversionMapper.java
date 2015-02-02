@@ -8,10 +8,8 @@ import java.util.Map.Entry;
 
 import mil.nga.giat.geowave.accumulo.AccumuloDataStore;
 import mil.nga.giat.geowave.accumulo.BasicAccumuloOperations;
-import mil.nga.giat.geowave.accumulo.metadata.AccumuloAdapterStore;
-import mil.nga.giat.geowave.accumulo.metadata.AccumuloIndexStore;
 import mil.nga.giat.geowave.vector.adapter.FeatureDataAdapter;
-import mil.nga.giat.osm.OSMFeatureBuilder;
+import mil.nga.giat.osm.osmfeature.OSMFeatureBuilder;
 import mil.nga.giat.geowave.store.index.Index;
 import mil.nga.giat.geowave.store.index.IndexType;
 
@@ -89,7 +87,7 @@ public class OSMConversionMapper extends Mapper<Key, Value, Text, Text> {
     	  Map<String, String> main = new HashMap<String, String>();
     	  Map<String, String> tags = new HashMap<String, String>();
     	  Map<Integer, Map<String, String>> roles = new HashMap<Integer, Map<String, String>>();
-     	  for (Entry<Key,Value> entry2 : WholeRowIterator.decodeRow(row,data).entrySet()){
+     	  for (Entry<Key,Value> entry2 : WholeRowIterator.decodeRow(row, data).entrySet()){
     			  String cf = entry2.getKey().getColumnFamily().toString();
     			  String cq = entry2.getKey().getColumnQualifier().toString();
     			  String v = new String(entry2.getValue().get());

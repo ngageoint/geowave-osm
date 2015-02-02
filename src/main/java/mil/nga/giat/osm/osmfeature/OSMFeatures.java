@@ -1,4 +1,4 @@
-package mil.nga.giat.osm;
+package mil.nga.giat.osm.osmfeature;
 
 import java.util.ArrayList;
 import java.util.Date;

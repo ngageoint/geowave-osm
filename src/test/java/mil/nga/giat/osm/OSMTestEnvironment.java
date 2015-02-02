@@ -135,7 +135,9 @@ public class OSMTestEnvironment  {
             if (hadoopHome == null) {
                 hadoopHome = System.getenv("HADOOP_HOME");
             }
-            CONF.set("hadoop.home.dir", hadoopHome);
+            if (hadoopHome != null) {
+                CONF.set("hadoop.home.dir", hadoopHome);
+            }
 
             //start DFS cluster
             MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(CONF);

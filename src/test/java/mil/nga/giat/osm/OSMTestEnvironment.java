@@ -142,10 +142,10 @@ public class OSMTestEnvironment  {
             HDFS_CLUSTER = builder.build();
 
             //start YARN cluster
-            YARN_MR_CLUSTER = new MiniMRYarnCluster(YARN_CLUSTER_NAME);
-            YARN_MR_CLUSTER.init(CONF);
+            //YARN_MR_CLUSTER = new MiniMRYarnCluster(YARN_CLUSTER_NAME);
+            //YARN_MR_CLUSTER.init(CONF);
             //YARN_MR_CLUSTER.start();
-            CONF = new YarnConfiguration(YARN_MR_CLUSTER.getConfig());
+            //CONF = new YarnConfiguration(YARN_MR_CLUSTER.getConfig());
 
             //start MiniAccumuloCluster
             FileUtil.fullyDelete(new File(ACCUMULO_BASE));

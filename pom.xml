@@ -42,7 +42,7 @@
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<test.args>-Xms256m -Xmx1024m -XX:MaxPermSize=256m</test.args>
-		<geowave.version>0.8.2</geowave.version>
+		<geowave.version>0.8.3-SNAPSHOT</geowave.version>
 		<junit.version>4.12</junit.version>
 	</properties>
 
@@ -112,6 +112,11 @@
 		<dependency>
 			<groupId>mil.nga.giat</groupId>
 			<artifactId>geowave-ingest</artifactId>
+			<version>${geowave.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>mil.nga.giat</groupId>
+			<artifactId>geowave-test</artifactId>
 			<version>${geowave.version}</version>
 		</dependency>
 		<dependency>
@@ -307,6 +312,25 @@
 						<exclude>**IT.java</exclude>
 					</excludes>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.18.1</version>
+				<executions>
+					<execution>
+						<configuration>
+							<argLine>${test.args} ${jacoco.failsafe.argline}</argLine>
+							<includes>
+								<include>**/*IT.java</include>
+							</includes>
+						</configuration>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

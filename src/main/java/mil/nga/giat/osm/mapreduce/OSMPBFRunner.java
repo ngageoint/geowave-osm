@@ -3,6 +3,7 @@ package mil.nga.giat.osm.mapreduce;
 import com.beust.jcommander.JCommander;
 import mil.nga.giat.geowave.accumulo.BasicAccumuloOperations;
 import mil.nga.giat.osm.accumulo.osmschema.Schema;
+import mil.nga.giat.osm.types.generated.Node;
 import org.apache.accumulo.core.client.AccumuloException;
 import org.apache.accumulo.core.client.AccumuloSecurityException;
 import org.apache.accumulo.core.client.ClientConfiguration;
@@ -10,10 +11,13 @@ import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.mapreduce.AccumuloOutputFormat;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Mutation;
+import org.apache.avro.mapreduce.AvroJob;
+import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -57,8 +61,9 @@ public class OSMPBFRunner extends Configured implements Tool {
         job.setJarByClass(OSMPBFRunner.class);
 
         //input format
-        SequenceFileInputFormat.setInputPaths(job, argv.hdfsBasePath);
-        job.setInputFormatClass(SequenceFileInputFormat.class);
+		job.setInputFormatClass(AvroKeyInputFormat.class);
+		FileInputFormat.setInputPaths(job, argv.getNodesBasePath());
+		AvroJob.setInputKeySchema(job, Node.getClassSchema());
 
         //mappper
         job.setMapperClass(OSMPBFMapper.class);

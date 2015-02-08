@@ -4,17 +4,19 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import mil.nga.giat.geowave.store.data.field.BasicWriter;
 import mil.nga.giat.osm.accumulo.osmschema.Schema;
+import mil.nga.giat.osm.types.generated.Node;
+import mil.nga.giat.osm.types.generated.Primitive;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.security.ColumnVisibility;
+import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import org.openstreetmap.osmosis.osmbinary.Fileformat.Blob;
-import org.openstreetmap.osmosis.osmbinary.Osmformat.*;
-import org.openstreetmap.osmosis.osmbinary.Osmformat.Relation.MemberType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +26,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
 
-public class OSMPBFMapper extends Mapper<LongWritable, BytesWritable, Text, Mutation> {
+public class OSMPBFMapper extends Mapper<AvroKey<Node>, NullWritable, Text, Mutation> {
 
     private static final Logger log = LoggerFactory.getLogger(OSMPBFMapper.class);
     private static final HashFunction _hf = Hashing.murmur3_128(1);
@@ -40,50 +43,53 @@ public class OSMPBFMapper extends Mapper<LongWritable, BytesWritable, Text, Muta
     private static final BasicWriter.CalendarWriter _calendarWriter = new BasicWriter.CalendarWriter();
 
     private ColumnVisibility _visibility = new ColumnVisibility("public".getBytes(Schema.CHARSET));
+
     private Text _tableName = new Text("OSM");
-
-    private static double parseLat(long degree, int granularity, long lat_offset) {
-        return .000000001 * (granularity * degree + lat_offset);
-    }
-
-    private static double parseLon(long degree, int granularity, long lon_offset) {
-        return .000000001 * (granularity * degree + lon_offset);
-    }
-
-    private static long parseTimestamp(long timestamp, int granularity) {
-        return timestamp * granularity;
-    }
-
-    private static String getString(int id, StringTable table) {
-        return table.getS(id).toStringUtf8();
-    }
 
     private byte[] getIdHash(long id) {
         return _hf.hashLong(id).asBytes();
     }
 
-    private void put(Mutation m, byte[] cf, byte[] cq, long val) {
-        m.put(cf, cq, _visibility, _longWriter.writeField(val));
+    private void put(Mutation m, byte[] cf, byte[] cq, Long val) {
+		if (val != null) {
+			m.put(cf, cq, _visibility, _longWriter.writeField(val));
+		}
     }
 
-    private void put(Mutation m, byte[] cf, byte[] cq, int val) {
-        m.put(cf, cq, _visibility, _intWriter.writeField(val));
+    private void put(Mutation m, byte[] cf, byte[] cq, Integer val) {
+		if (val != null) {
+			m.put(cf, cq, _visibility, _intWriter.writeField(val));
+		}
     }
 
-    private void put(Mutation m, byte[] cf, byte[] cq, double val) {
-        m.put(cf, cq, _visibility, _doubleWriter.writeField(val));
+    private void put(Mutation m, byte[] cf, byte[] cq, Double val) {
+		if (val != null) {
+			m.put(cf, cq, _visibility, _doubleWriter.writeField(val));
+		}
     }
 
     private void put(Mutation m, byte[] cf, byte[] cq, String val) {
-        m.put(cf, cq, _visibility, _stringWriter.writeField(val));
+		if (val != null) {
+			m.put(cf, cq, _visibility, _stringWriter.writeField(val));
+		}
     }
 
-    private void put(Mutation m, byte[] cf, byte[] cq, boolean val) {
-        m.put(cf, cq, _visibility, _booleanWriter.writeField(val));
+	private void put(Mutation m, byte[] cf, byte[] cq, CharSequence val) {
+		if (val != null) {
+			m.put(cf, cq, _visibility, _stringWriter.writeField(val.toString()));
+		}
+	}
+
+    private void put(Mutation m, byte[] cf, byte[] cq, Boolean val) {
+		if (val != null) {
+			m.put(cf, cq, _visibility, _booleanWriter.writeField(val));
+		}
     }
 
     private void put(Mutation m, byte[] cf, byte[] cq, Calendar val) {
-        m.put(cf, cq, _visibility, _calendarWriter.writeField(val));
+		if (val != null) {
+			m.put(cf, cq, _visibility, _calendarWriter.writeField(val));
+		}
     }
 
     @Override
@@ -101,8 +107,47 @@ public class OSMPBFMapper extends Mapper<LongWritable, BytesWritable, Text, Muta
     }
 
     @Override
-    public void map(LongWritable key, BytesWritable value, Context context) throws IOException, InterruptedException {
+    public void map(AvroKey<Node> key, NullWritable value, Context context) throws IOException, InterruptedException {
 
+		Node node = key.datum();
+		Primitive p = node.getCommon();
+
+		Mutation m = new Mutation(getIdHash(p.getId()));
+
+			put(m, Schema.CF.NODE, Schema.CQ.ID, p.getId());
+			put(m, Schema.CF.NODE, Schema.CQ.LONGITUDE, node.getLongitude());
+			put(m, Schema.CF.NODE, Schema.CQ.LATITUDE, node.getLatitude());
+
+
+
+			if (!Long.valueOf(0).equals(p.getVersion())) {
+				put(m, Schema.CF.NODE, Schema.CQ.VERSION, p.getVersion());
+			}
+
+			if (!Long.valueOf(0).equals(p.getTimestamp())) {
+				put(m, Schema.CF.NODE, Schema.CQ.TIMESTAMP, p.getTimestamp());
+			}
+
+			if (!Long.valueOf(0).equals(p.getChangesetId())) {
+				put(m, Schema.CF.NODE, Schema.CQ.CHANGESET, p.getChangesetId());
+			}
+
+			if (!Long.valueOf(0).equals(p.getUserId())) {
+				put(m, Schema.CF.NODE, Schema.CQ.USER_ID, p.getUserId());
+			}
+
+
+			put(m, Schema.CF.NODE, Schema.CQ.USER_TEXT, p.getUserName());
+			put(m, Schema.CF.NODE, Schema.CQ.OSM_VISIBILITY, p.getVisible());
+
+			for (Map.Entry<CharSequence, CharSequence> kvp : p.getTags().entrySet()) {
+				put(m, Schema.CF.NODE_TAG, kvp.getKey().toString().getBytes(Schema.CHARSET), kvp.getValue().toString());
+			}
+			context.write(_tableName, m);
+
+
+
+    /*
         Blob blob = Blob.parseFrom(new ByteArrayInputStream(value.getBytes(), 0, value.getLength()));
 
         InputStream blobData;
@@ -310,5 +355,6 @@ public class OSMPBFMapper extends Mapper<LongWritable, BytesWritable, Text, Muta
 
             }
         }
+        */
     }
 }

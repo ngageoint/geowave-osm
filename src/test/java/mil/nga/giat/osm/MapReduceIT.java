@@ -66,9 +66,9 @@ public class MapReduceIT
 		System.out.println("finished osmpbf ingest");
 
 
-		//String[] argv = new String[] {"-z", zookeeper, "-i", accumuloInstance, "-au", accumuloUser, "-ap", accumuloPassword, "-n", "osmnamespace", "-v", "public", "-out", args.hdfsSequenceFile, "-jn", "ConversionTest"};
-		//ToolRunner.run(CONF, new OSMPBFRunner(), argv);
-		//System.out.println("finished accumulo ingest 1");
+		String[] argv = new String[] {"-z", zookeeper, "-i", accumuloInstance, "-au", accumuloUser, "-ap", accumuloPassword, "-n", "osmnamespace", "-v", "public", "-out", args.hdfsBasePath, "-jn", "ConversionTest"};
+		ToolRunner.run(CONF, new OSMPBFRunner(), argv);
+		System.out.println("finished accumulo ingest 1");
 
 
 

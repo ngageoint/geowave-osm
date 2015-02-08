@@ -49,4 +49,16 @@ public class OSMPBFMapperCommandArgs {
         return AccumuloUtils.getQualifiedTableName(osmNamespace,osmTableName);
     }
 
+	public String getNodesBasePath(){
+		return hdfsBasePath + "/nodes";
+	}
+
+	public String getWaysBasePath(){
+		return hdfsBasePath + "/ways";
+	}
+
+	public String getRelationsBasePath(){
+		return hdfsBasePath + "/relations";
+	}
+
 }

@@ -1,19 +1,12 @@
 package mil.nga.giat.osm.mapreduce;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import com.beust.jcommander.JCommander;
 import mil.nga.giat.geowave.accumulo.BasicAccumuloOperations;
-import mil.nga.giat.geowave.accumulo.util.AccumuloUtils;
 import mil.nga.giat.osm.accumulo.osmschema.Schema;
-import org.apache.accumulo.core.client.*;
-import org.apache.accumulo.core.client.admin.TableOperations;
-import org.apache.accumulo.core.client.impl.ConnectorImpl;
+import org.apache.accumulo.core.client.AccumuloException;
+import org.apache.accumulo.core.client.AccumuloSecurityException;
+import org.apache.accumulo.core.client.ClientConfiguration;
+import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.mapreduce.AccumuloOutputFormat;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Mutation;
@@ -64,7 +57,7 @@ public class OSMPBFRunner extends Configured implements Tool {
         job.setJarByClass(OSMPBFRunner.class);
 
         //input format
-        SequenceFileInputFormat.setInputPaths(job, argv.hdfsSequenceFile);
+        SequenceFileInputFormat.setInputPaths(job, argv.hdfsBasePath);
         job.setInputFormatClass(SequenceFileInputFormat.class);
 
         //mappper

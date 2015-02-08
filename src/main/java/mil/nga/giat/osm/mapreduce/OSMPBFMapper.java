@@ -88,8 +88,16 @@ public class OSMPBFMapper extends Mapper<LongWritable, BytesWritable, Text, Muta
 
     @Override
     public void setup(Context context) throws IOException, InterruptedException {
-        _tableName = new Text(context.getConfiguration().get("tableName"));
-        _visibility = new ColumnVisibility(context.getConfiguration().get("osmVisibility").getBytes(Schema.CHARSET));
+        String tn = context.getConfiguration().get("tableName");
+		if (tn != null && !tn.isEmpty()){
+			_tableName.set(tn);
+		}
+		String visibility = context.getConfiguration().get("osmVisibility");
+		if (visibility == null){
+			visibility = "";
+		}
+
+        _visibility = new ColumnVisibility(visibility.getBytes(Schema.CHARSET));
     }
 
     @Override
@@ -267,16 +275,29 @@ public class OSMPBFMapper extends Mapper<LongWritable, BytesWritable, Text, Muta
 
                     if (dn.getDenseinfo() != null) {
 
-                        lastTimestamp += dn.getDenseinfo().getTimestamp(i);
-                        lastChangeset += dn.getDenseinfo().getChangeset(i);
-                        lastUid += dn.getDenseinfo().getUid(i);
-                        lastSid += dn.getDenseinfo().getUserSid(i);
+						if (dn.getDenseinfo().getTimestampCount() > i) {
+							lastTimestamp += dn.getDenseinfo().getTimestamp(i);
+							put(m, Schema.CF.NODE, Schema.CQ.TIMESTAMP, parseTimestamp(lastTimestamp, pb.getDateGranularity()));
+						}
 
-                        put(m, Schema.CF.NODE, Schema.CQ.VERSION, dn.getDenseinfo().getVersion(i));
-                        put(m, Schema.CF.NODE, Schema.CQ.TIMESTAMP, parseTimestamp(lastTimestamp, pb.getDateGranularity()));
-                        put(m, Schema.CF.NODE, Schema.CQ.CHANGESET, lastChangeset);
-                        put(m, Schema.CF.NODE, Schema.CQ.USER_ID, lastUid);
-                        put(m, Schema.CF.NODE, Schema.CQ.USER_TEXT, getString(lastSid, pb.getStringtable()));
+						if (dn.getDenseinfo().getChangesetCount() > i) {
+							lastChangeset += dn.getDenseinfo().getChangeset(i);
+							put(m, Schema.CF.NODE, Schema.CQ.CHANGESET, lastChangeset);
+						}
+
+						if (dn.getDenseinfo().getUidCount() > i) {
+							lastUid += dn.getDenseinfo().getUid(i);
+							put(m, Schema.CF.NODE, Schema.CQ.USER_ID, lastUid);
+						}
+
+						if (dn.getDenseinfo().getUserSidCount() > i) {
+							lastSid += dn.getDenseinfo().getUserSid(i);
+							put(m, Schema.CF.NODE, Schema.CQ.USER_TEXT, getString(lastSid, pb.getStringtable()));
+						}
+
+						if (dn.getDenseinfo().getVersionCount() > i) {
+							put(m, Schema.CF.NODE, Schema.CQ.VERSION, dn.getDenseinfo().getVersion(i));
+						}
 
                         if (hasVisibility) {
                             put(m, Schema.CF.NODE, Schema.CQ.OSM_VISIBILITY, dn.getDenseinfo().getVisible(i));

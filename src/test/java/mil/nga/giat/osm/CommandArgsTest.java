@@ -4,6 +4,9 @@ import com.beust.jcommander.JCommander;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CommandArgsTest {
 
 
@@ -21,7 +24,8 @@ public class CommandArgsTest {
         String nn = "hdfs_namenode:port";
         Boolean dropTable = true;
 
-        String[] argv = {"-z", z, "-i", i, "-au", au, "-ap", ap, "-n", n, "-v", v, "-in", in, "-out", out, "-nn", nn, dropTable ? "--dropOSMData" : ""};
+
+		String[] argv = buildArgsString(z, i, au, ap, n, v, in, out, nn, dropTable);
         final OSMCommandArgs osmArgs = new OSMCommandArgs();
         final JCommander cmd = new JCommander(osmArgs, argv);
 
@@ -33,7 +37,16 @@ public class CommandArgsTest {
         Assert.assertEquals(n, osmArgs.osmNamespace);
         Assert.assertEquals(v, osmArgs.visibility);
         Assert.assertEquals(in, osmArgs.ingestDirectory);
-        Assert.assertEquals(out, osmArgs.hdfsSequenceFile);
+        Assert.assertEquals(out, osmArgs.hdfsBasePath);
         Assert.assertEquals(nn, osmArgs.nameNode);
     }
+
+
+	protected static String[] buildArgsString(String zookeepers, String accumuloInstance, String accumuloUsername,
+			String accumuloPassword, String osmNamespace, String osmVisibility, String inputDirectory, String hdfsBasePath, String namenode, boolean dropTable){
+
+		return new String[] {"-z", zookeepers, "-i", accumuloInstance, "-au", accumuloUsername, "-ap", accumuloPassword, "-n", osmNamespace, "-v", osmVisibility, "-in", inputDirectory, "-out", hdfsBasePath, "-nn", namenode, dropTable ? "--dropOSMData" : ""};
+	}
+
+
 }

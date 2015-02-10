@@ -20,6 +20,10 @@ public class ColumnQualifier {
     public static final String REFERENCE_ROLEID_PREFIX = "refrol";
     public static final String REFERENCE_TYPE_PREFIX = "reftype";
 
+    public static byte[] getRelationMember(String prefix, int i){
+        return (prefix +"_" + String.valueOf(i)).getBytes(Schema.CHARSET);
+    }
+
     public static byte[] TAG_QUALIFIER(String tag){
         Preconditions.checkNotNull(tag);
         return tag.getBytes(Schema.CHARSET);

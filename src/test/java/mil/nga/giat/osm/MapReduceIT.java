@@ -1,7 +1,6 @@
 package mil.nga.giat.osm;
 
 import mil.nga.giat.geowave.test.GeoWaveDFSTestEnvironment;
-import mil.nga.giat.osm.mapreduce.OSMPBFMapperCommandArgs;
 import mil.nga.giat.osm.mapreduce.OSMPBFRunner;
 import mil.nga.giat.osm.parser.OsmPbfParser;
 import net.lingala.zip4j.core.ZipFile;
@@ -9,8 +8,6 @@ import net.lingala.zip4j.exception.ZipException;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.util.ToolRunner;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -66,10 +63,17 @@ public class MapReduceIT
 		System.out.println("finished osmpbf ingest");
 
 
-		String[] argv = new String[] {"-z", zookeeper, "-i", accumuloInstance, "-au", accumuloUser, "-ap", accumuloPassword, "-n", "osmnamespace", "-v", "public", "-out", args.hdfsBasePath, "-jn", "ConversionTest"};
+		String[] argv = new String[] {"-z", zookeeper, "-i", accumuloInstance, "-au", accumuloUser, "-ap", accumuloPassword, "-n", "osmnamespace", "-v", "public", "-out", args.hdfsBasePath, "-jn", "ConversionTest", "-t", "NODE"};
 		ToolRunner.run(CONF, new OSMPBFRunner(), argv);
-		System.out.println("finished accumulo ingest 1");
+		System.out.println("finished accumulo ingest Node");
 
+        argv = new String[] {"-z", zookeeper, "-i", accumuloInstance, "-au", accumuloUser, "-ap", accumuloPassword, "-n", "osmnamespace", "-v", "public", "-out", args.hdfsBasePath, "-jn", "ConversionTest", "-t", "WAY"};
+        ToolRunner.run(CONF, new OSMPBFRunner(), argv);
+        System.out.println("finished accumulo ingest Way");
+
+        argv = new String[] {"-z", zookeeper, "-i", accumuloInstance, "-au", accumuloUser, "-ap", accumuloPassword, "-n", "osmnamespace", "-v", "public", "-out", args.hdfsBasePath, "-jn", "ConversionTest", "-t", "RELATION"};
+        ToolRunner.run(CONF, new OSMPBFRunner(), argv);
+        System.out.println("finished accumulo ingest Relation");
 
 
 

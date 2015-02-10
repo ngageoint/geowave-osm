@@ -4,11 +4,13 @@ import com.beust.jcommander.Parameter;
 import mil.nga.giat.geowave.accumulo.util.AccumuloUtils;
 
 
-public class OSMPBFMapperCommandArgs {
+public class OSMMapperCommandArgs {
 
-    public OSMPBFMapperCommandArgs(){}
+    public OSMMapperCommandArgs(){}
 
-    public OSMPBFMapperCommandArgs(String zookeepers, String instanceName, String user, String pass, String osmNamespace, String visibility, String hdfsSequenceFile, String jobName){
+    public OSMMapperCommandArgs(String zookeepers, String instanceName, String user, String pass,
+                                String osmNamespace, String visibility, String hdfsSequenceFile,
+                                String jobName, String mapperType){
         this.zookeepers = zookeepers;
         this.instanceName = instanceName;
         this.user = user;
@@ -17,6 +19,7 @@ public class OSMPBFMapperCommandArgs {
         this.visibility = visibility;
         this.hdfsBasePath = hdfsSequenceFile;
         this.jobName = jobName;
+        this.mapperType = mapperType;
     }
 
     @Parameter(names = {"-z","--zookeepers"} , required = false, description = "list of zookeeper:port instances, comma separated")
@@ -42,6 +45,9 @@ public class OSMPBFMapperCommandArgs {
 
     @Parameter(names = {"-jn", "--jobName"}, required = false, description = "Name of mapreduce job")
 	public String jobName = "PBF Ingest (" + System.getProperty("user.name") + ")";
+
+    @Parameter(names = {"-t", "--type"}, required = true, description = "Mapper type - one of node, way, or relation")
+    public String mapperType;
 
     protected String osmTableName = "OSM";
 

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import mil.nga.giat.osm.mapreduce.OSMPBFMapper;
-import mil.nga.giat.osm.mapreduce.OSMPBFRunner;
 import mil.nga.giat.geowave.store.GeometryUtils;
 
 import org.apache.accumulo.core.client.BatchScanner;
@@ -18,7 +16,6 @@ import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
-import org.apache.hadoop.io.Text;
 import org.apache.log4j.Logger;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
@@ -206,7 +203,7 @@ public class OSMFeatureBuilder {
 	
 	private static Geometry handleWay(Connector conn, String tableName, Map<String, String> tags, Map<String, String> way, Map<String, String> info){
 
-		String refs = "";//way.get(OSMPBFMapper.wayrefText.toString());
+		String refs = "";//way.get(OSMMapperBase.wayrefText.toString());
 
 		List<Long> allRefs = new ArrayList<Long>();
 		for (String l : refs.split(",")){
@@ -393,20 +390,20 @@ public class OSMFeatureBuilder {
 			ranges.add(new Range("w_" + way));
 			
 			scan.setRanges(ranges);
-			//scan.fetchColumnFamily(OSMPBFMapper.wayText);
-			//scan.fetchColumnFamily(OSMPBFMapper.wayinfoText);
+			//scan.fetchColumnFamily(OSMMapperBase.wayText);
+			//scan.fetchColumnFamily(OSMMapperBase.wayinfoText);
 			
 			
 			
 			for (Entry<Key, Value> entry : scan ){
-				if (entry.getKey().getColumnFamily().toString().equals("")){//OSMPBFMapper.wayText.toString())) {
+				if (entry.getKey().getColumnFamily().toString().equals("")){//OSMMapperBase.wayText.toString())) {
 					if (entry.getKey().getColumnQualifier().toString().equals("refs")){
 						String[] srefs = entry.getValue().toString().split(",");
 						for (String s : srefs){
 							refs.add(Long.parseLong(s));
 						}
 					}
-				} /*else if (entry.getKey().getColumnFamily().toString().equals(OSMPBFMapper.wayTagText.toString())) {
+				} /*else if (entry.getKey().getColumnFamily().toString().equals(OSMMapperBase.wayTagText.toString())) {
 					String tagname = entry.getKey().getColumnQualifier().toString().split("__")[1];
 					String val = new String(entry.getValue().get());
 					tags.put(tagname, val);
@@ -436,7 +433,7 @@ public class OSMFeatureBuilder {
 				ranges.add(new Range("n_" + i));
 			}
 			scan.setRanges(ranges);
-			//scan.fetchColumnFamily(OSMPBFMapper.nodeText);
+			//scan.fetchColumnFamily(OSMMapperBase.nodeText);
 			
 			String key = "";
 			Double lat = -1.0;

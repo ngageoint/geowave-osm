@@ -1,4 +1,4 @@
-package mil.nga.giat.osm.mapreduce;
+package mil.nga.giat.osm.mapreduce.Ingest;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -6,8 +6,6 @@ import mil.nga.giat.geowave.store.data.field.BasicWriter;
 import mil.nga.giat.osm.accumulo.osmschema.Schema;
 import mil.nga.giat.osm.types.TypeUtils;
 import mil.nga.giat.osm.types.generated.LongArray;
-import mil.nga.giat.osm.types.generated.Node;
-import mil.nga.giat.osm.types.generated.Primitive;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.avro.mapred.AvroKey;
@@ -21,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Map;
 
 
 public class OSMMapperBase<T> extends Mapper<AvroKey<T>, NullWritable, Text, Mutation> {

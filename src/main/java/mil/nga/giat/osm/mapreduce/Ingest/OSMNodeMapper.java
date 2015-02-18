@@ -1,4 +1,4 @@
-package mil.nga.giat.osm.mapreduce;
+package mil.nga.giat.osm.mapreduce.Ingest;
 
 
 import mil.nga.giat.osm.accumulo.osmschema.Schema;

@@ -44,6 +44,7 @@
 		<test.args>-Xms256m -Xmx1024m -XX:MaxPermSize=256m</test.args>
 		<geowave.version>0.8.3-SNAPSHOT</geowave.version>
 		<junit.version>4.12</junit.version>
+        <jackson.core.version>2.5.1</jackson.core.version>
 	</properties>
 
 	<dependencies>
@@ -170,6 +171,11 @@
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
             <version>${avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.core.version}</version>
         </dependency>
     </dependencies>
 

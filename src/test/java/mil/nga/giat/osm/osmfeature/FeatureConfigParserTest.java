@@ -24,7 +24,7 @@ public class FeatureConfigParserTest
 		FileInputStream fis = new FileInputStream(new File(TEST_DATA_CONFIG));
 
 
-		fds = fcp.parseConfig(fis);
+		//fds = fcp.parseConfig(fis);
 
 
 		fis.close();

@@ -36,7 +36,7 @@ public class OsmPbfParser
 
 	private static Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OsmPbfParser.class);
 
-	public void StageData(OSMCommandArgs args) throws IOException {
+	public void stageData(OSMCommandArgs args) throws IOException {
 		final OSMCommandArgs arg = args;
 		final Configuration conf = new Configuration();
 		conf.set("fs.default.name", "hdfs://" + args.nameNode);
@@ -319,6 +319,11 @@ public class OsmPbfParser
 			p.setUserName(getStringById(info.getUid()));
 			p.setChangesetId(info.getChangeset());
 			p.setVisible(info.getVisible());
+			if (info.getUid() != 0){
+				System.out.println("************************");
+				System.out.println(info.getUid());
+				System.out.println("************************");
+			}
 			return p;
 		}
 	}

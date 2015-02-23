@@ -110,6 +110,7 @@ public class FeatureConfigParser
 				mapValues.add(mapVal.asText());
 			}
 			fd.Mappings.put(mapKVP.getKey(), mapValues);
+			fd.MappingKeys.add(mapKVP.getKey());
 		}
 	}
 
@@ -131,6 +132,7 @@ public class FeatureConfigParser
 						fd.SubMappings.put(mappingsKVP.getKey(), new ArrayList<Map<String, List<String>>>());
 					}
 					fd.SubMappings.get(mappingsKVP.getKey()).add(submapping);
+					fd.MappingKeys.add(mappingsKVP.getKey());
 				}
 
 			}

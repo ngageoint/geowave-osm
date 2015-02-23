@@ -6,30 +6,35 @@ import mil.nga.giat.geowave.index.ByteArrayUtils;
 import mil.nga.giat.geowave.index.PersistenceUtils;
 import mil.nga.giat.geowave.ingest.hdfs.mapreduce.AbstractMapReduceIngest;
 import mil.nga.giat.geowave.ingest.hdfs.mapreduce.IngestWithMapper;
+import mil.nga.giat.geowave.store.data.field.BasicReader;
+import mil.nga.giat.geowave.store.data.field.BasicWriter;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.iterators.user.WholeRowIterator;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.opengis.feature.simple.SimpleFeature;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class OSMConversionMapper extends Mapper<Key, Value, GeoWaveOutputKey, Object>{
 
-	private static ByteArrayId indexId = null;
-	private static String globalVisibility = "";
+	private ByteArrayId indexId = null;
+	private String globalVisibility = "";
+	private final SimpleFeatureGenerator sfg = new SimpleFeatureGenerator();
+
+
 
 	@Override protected void map( Key key, Value value, Context context )
 			throws IOException, InterruptedException {
 		ByteArrayId adapterId = null;
-		SimpleFeature sf = null;
 
-		for (Map.Entry<Key,Value> entry2 : WholeRowIterator.decodeRow(key, value).entrySet()){
+		List<SimpleFeature> sf = sfg.mapOSMtoSimpleFeature(WholeRowIterator.decodeRow(key, value));
 
 
-		}
-		context.write(new GeoWaveOutputKey(adapterId, indexId), sf);
+		//context.write(new GeoWaveOutputKey(adapterId, indexId), sf);
 	}
 
 	@Override protected void setup( Context context )

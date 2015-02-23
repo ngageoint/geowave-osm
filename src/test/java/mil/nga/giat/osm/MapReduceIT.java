@@ -1,10 +1,19 @@
 package mil.nga.giat.osm;
 
+import mil.nga.giat.geowave.accumulo.BasicAccumuloOperations;
 import mil.nga.giat.geowave.test.GeoWaveDFSTestEnvironment;
+import mil.nga.giat.osm.mapreduce.Convert.OSMConversionRunner;
+import mil.nga.giat.osm.mapreduce.Ingest.OSMMapperCommandArgs;
 import mil.nga.giat.osm.mapreduce.Ingest.OSMRunner;
+import mil.nga.giat.osm.osmfeature.types.features.FeatureDefinitionSet;
 import mil.nga.giat.osm.parser.OsmPbfParser;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.client.ZooKeeperInstance;
+import org.apache.accumulo.core.client.security.tokens.PasswordToken;
+import org.apache.accumulo.core.security.Authorizations;
+import org.apache.accumulo.server.security.SecurityOperation;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.util.ToolRunner;
@@ -29,6 +38,7 @@ public class MapReduceIT
 
 
 
+
 	@BeforeClass
 	public static void setupTestData()
 			throws ZipException {
@@ -49,7 +59,7 @@ public class MapReduceIT
 		//OSMPBFStage stager = new OSMPBFStage();
 		//stager.StageData(args);
 		OsmPbfParser osmPbfParser = new OsmPbfParser();
-		osmPbfParser.StageData(args);
+		osmPbfParser.stageData(args);
 
 		ContentSummary cs = getHDFSFileSummary(args.hdfsBasePath);
 		System.out.println("**************************************************");
@@ -61,6 +71,12 @@ public class MapReduceIT
 		System.out.println("**************************************************");
 		//Assert.assertEquals(cs.getLength(), 204006l);
 		System.out.println("finished osmpbf ingest");
+
+
+		Connector conn = new ZooKeeperInstance(accumuloInstance, zookeeper).getConnector(accumuloUser, new PasswordToken(accumuloPassword));
+		Authorizations auth = new Authorizations(new String[] {"public"});
+		conn.securityOperations().changeUserAuthorizations(accumuloUser, auth);
+
 
 
 		String[] argv = new String[] {"-z", zookeeper, "-i", accumuloInstance, "-au", accumuloUser, "-ap", accumuloPassword, "-n", "osmnamespace", "-v", "public", "-out", args.hdfsBasePath, "-jn", "ConversionTest", "-t", "NODE"};
@@ -76,6 +92,12 @@ public class MapReduceIT
         System.out.println("finished accumulo ingest Relation");
 
 
+		FeatureDefinitionSet.initialize(new OSMMapperCommandArgs().getMappingContents());
+
+		//Test conversion
+		argv = new String[] {"-z", zookeeper, "-i", accumuloInstance, "-au", accumuloUser, "-ap", accumuloPassword, "-n", "osmnamespace", "-v", "public", "-out", args.hdfsBasePath, "-jn", "ConversionTest", "-t", "RELATION"};
+		ToolRunner.run(CONF, new OSMConversionRunner(), argv);
+		System.out.println("finished conversion");
 
 	}
 

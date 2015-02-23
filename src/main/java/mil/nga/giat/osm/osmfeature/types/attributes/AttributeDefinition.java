@@ -10,4 +10,8 @@ public class AttributeDefinition {
 	public String Name = null;
 	public String Key = null;
 	public final Map<String, List<String>> Args = new HashMap<>();
+
+	public Object convert(Object obj){
+		return AttributeTypes.getAttributeType(Type).convert(obj);
+	}
 }

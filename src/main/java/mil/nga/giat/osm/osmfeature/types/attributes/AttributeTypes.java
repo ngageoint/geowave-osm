@@ -1,6 +1,8 @@
 package mil.nga.giat.osm.osmfeature.types.attributes;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.Map;
 public class AttributeTypes
 {
 	private final static Map<Class, AttributeType> AttributeDefinitionCache = new HashMap<Class, AttributeType>();
+	private final static Logger log = LoggerFactory.getLogger(AttributeTypes.class);
 
 	static {
 		AttributeDefinitionCache.put(String.class, new StringAttributeType());
@@ -19,9 +22,12 @@ public class AttributeTypes
 		AttributeDefinitionCache.put(Boolean.class, new BooleanAttributeType());
 	}
 
-	public static AttributeType GetAttributeType(String imposm3TypeName){
+	public static AttributeType getAttributeType(String imposm3TypeName){
 		switch (imposm3TypeName){
 			case "id" : {
+				return AttributeDefinitionCache.get(Long.class);
+			}
+			case "osm_id" : {
 				return AttributeDefinitionCache.get(Long.class);
 			}
 			case "string" : {
@@ -45,11 +51,12 @@ public class AttributeTypes
 			case "direction" : {
 				return AttributeDefinitionCache.get(Short.class);
 			}
+			case "mapping_key" : {
+				return AttributeDefinitionCache.get(String.class);
+			}
 		}
 		return null;
 	}
-
-
 
 
 
@@ -158,7 +165,11 @@ public class AttributeTypes
 			} else if (val.equals("0") || val.equals("false") || val.equals("f") || val.equals("n") || val.equals("no")){
 				return false;
 			}
-			return null;
+			if (val ==null){
+				val = "<NULL>";
+			}
+			log.error("Unable to parse value: " + val + " as boolean");
+			throw new IllegalArgumentException("Value: " + val + " was not a valid boolean value");
 		}
 
 		@Override

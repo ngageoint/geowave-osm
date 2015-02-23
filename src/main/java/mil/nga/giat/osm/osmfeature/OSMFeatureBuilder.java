@@ -44,12 +44,12 @@ public class OSMFeatureBuilder {
 	}
 	
 	
-	public static List<SimpleFeature> GetFeatures(Connector conn, String table, String qualifier, Map<String, String> tags, Map<String, String> node, Map<String, String> info){
-		return GetFeatures(conn, table, qualifier, tags, node, info, null);
+	public static List<SimpleFeature> getFeatures(Connector conn, String table, String qualifier, Map<String, String> tags, Map<String, String> node, Map<String, String> info){
+		return getFeatures(conn, table, qualifier, tags, node, info, null);
 	}
 	
 	
-	public static List<SimpleFeature> GetFeatures(Connector conn, String table, String qualifier, Map<String, String> tags, Map<String, String> node, Map<String, String> info, Map<Integer, Map<String, String>> roles){
+	public static List<SimpleFeature> getFeatures(Connector conn, String table, String qualifier, Map<String, String> tags, Map<String, String> node, Map<String, String> info, Map<Integer, Map<String, String>> roles){
 		
 		OSMFeatures.FEATURES main = null;
 		
@@ -347,7 +347,6 @@ public class OSMFeatureBuilder {
 							ls = GeometryUtils.GEOMETRY_FACTORY.createLineString(way.toArray(new Coordinate[way.size()]));
 						if (ls != null)
 							mls.add(ls);
-						
 						break;
 					case "NODE" :
 						System.out.println("Points not supported for multipolygon - id: " + node.get("id"));
@@ -356,7 +355,7 @@ public class OSMFeatureBuilder {
 						//pt.add(Long.parseLong(kvp.getValue().get("memid")));
 						
 						//List<Coordinate> pts = getPoints(pt, conn, tableName);
-											
+							break;
 					case "RELATION" :
 						System.out.println("Relation not supported for multipolygon - id: " + node.get("id"));
 						break;

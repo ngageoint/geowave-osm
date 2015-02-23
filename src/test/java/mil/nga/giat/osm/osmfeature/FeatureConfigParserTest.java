@@ -15,7 +15,7 @@ public class FeatureConfigParserTest
 
 
 	@Test
-	public void TestFeatureConfigParser()
+	public void testFeatureConfigParser()
 			throws IOException {
 		FeatureConfigParser fcp = new FeatureConfigParser();
 

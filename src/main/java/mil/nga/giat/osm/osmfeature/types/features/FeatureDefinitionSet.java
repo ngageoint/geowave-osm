@@ -34,7 +34,7 @@ public class FeatureDefinitionSet {
 	private static boolean initialized = false;
 	private static final Logger LOGGER = LoggerFactory.getLogger(FeatureDefinitionSet.class);
 
-	public static void Initialize(String configFile){
+	public static void initialize(String configFile){
 		synchronized (MUTEX) {
 			if (!initialized) {
 				FeatureConfigParser fcp = new FeatureConfigParser();
@@ -82,14 +82,21 @@ public class FeatureDefinitionSet {
 		}
 		sftb.add(atb.binding(geomClass).nillable(false).buildDescriptor("geom"));
 		for (AttributeDefinition ad : fd.Attributes){
-			AttributeType at = AttributeTypes.GetAttributeType(ad.Type);
+			AttributeType at = AttributeTypes.getAttributeType(ad.Type);
 			if (at != null){
-				sftb.add(atb.binding(at.getClassType()).nillable(true).buildDescriptor(ad.Name));
+				sftb.add(atb.binding(at.getClassType()).nillable(true).buildDescriptor(normalizeOsmNames(ad.Name)));
 			}
 		}
 		SimpleFeatureType sft = sftb.buildFeatureType();
 		featureTypes.put(fd.Name, sft);
 		featureAdapters.put(fd.Name, new FeatureDataAdapter(sft));
+	}
+
+	public static String normalizeOsmNames(String name){
+		if (name == null)
+			return null;
+
+		return name.trim().toLowerCase().replace(":", "_");
 	}
 
 

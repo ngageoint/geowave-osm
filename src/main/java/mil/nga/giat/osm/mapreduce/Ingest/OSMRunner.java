@@ -35,7 +35,7 @@ public class OSMRunner
 
     public static void main(String[] args) throws Exception {
         OSMMapperCommandArgs argv = new OSMMapperCommandArgs();
-        JCommander cmd = new JCommander(argv, args);
+        new JCommander(argv, args);
         OSMRunner runner = new OSMRunner();
 
         int res = ToolRunner.run(new Configuration(), runner, args);
@@ -59,9 +59,9 @@ public class OSMRunner
     public int run(String[] args) throws Exception {
 
         OSMMapperCommandArgs argv = new OSMMapperCommandArgs();
-        JCommander cmd = new JCommander(argv, args);
+        new JCommander(argv, args);
         Configuration conf = this.getConf();
-        conf.set("tableName", argv.GetQualifiedTableName());
+        conf.set("tableName", argv.getQualifiedTableName());
         conf.set("osmVisibility", argv.visibility);
 
         //job settings
@@ -109,7 +109,7 @@ public class OSMRunner
         job.setOutputFormatClass(AccumuloOutputFormat.class);
         AccumuloOutputFormat.setConnectorInfo(job, argv.user, new PasswordToken(argv.pass));
         AccumuloOutputFormat.setCreateTables(job, true);
-        AccumuloOutputFormat.setDefaultTableName(job, argv.GetQualifiedTableName());
+        AccumuloOutputFormat.setDefaultTableName(job, argv.getQualifiedTableName());
         AccumuloOutputFormat.setZooKeeperInstance(job, new ClientConfiguration().withInstance(argv.instanceName).withZkHosts(argv.zookeepers));
 
         //reducer

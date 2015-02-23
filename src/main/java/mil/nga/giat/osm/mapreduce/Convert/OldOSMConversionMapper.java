@@ -109,7 +109,7 @@ public class OldOSMConversionMapper
     				  roles.get(id).put(role, v);
     			  }
     		  }
-    		  List<SimpleFeature> feats = OSMFeatureBuilder.GetFeatures(_conn, _inputTable, _qualifier, tags, main, info, roles);
+    		  List<SimpleFeature> feats = OSMFeatureBuilder.getFeatures(_conn, _inputTable, _qualifier, tags, main, info, roles);
     		  if (feats != null){
 	    		  for (SimpleFeature sf : feats){
 	    			  if (sf != null) {

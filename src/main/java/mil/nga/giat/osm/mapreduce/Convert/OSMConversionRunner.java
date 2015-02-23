@@ -58,7 +58,7 @@ public class OSMConversionRunner
 	public int run(String[] args) throws Exception {
 
 		OSMMapperCommandArgs argv = new OSMMapperCommandArgs();
-		JCommander cmd = new JCommander(argv, args);
+		new JCommander(argv, args);
 		Configuration conf = this.getConf();
 		conf.set("osm_mapping", argv.getMappingContents());
 
@@ -76,7 +76,7 @@ public class OSMConversionRunner
 		//input format
 
 		AccumuloInputFormat.setConnectorInfo(job, argv.user, new PasswordToken(argv.pass));
-		AccumuloInputFormat.setInputTableName(job, argv.GetQualifiedTableName());
+		AccumuloInputFormat.setInputTableName(job, argv.getQualifiedTableName());
 		AccumuloInputFormat.setZooKeeperInstance(job, new ClientConfiguration().withInstance(argv.instanceName).withZkHosts(argv.zookeepers));
 		AccumuloInputFormat.setScanAuthorizations(job, new Authorizations(argv.visibility));
 
@@ -88,11 +88,14 @@ public class OSMConversionRunner
 		columns.add(new Pair<>(new Text(Schema.CF.NODE), new Text()));
 
 		AccumuloInputFormat.setRanges(job, Arrays.asList(r));
-		AccumuloInputFormat.fetchColumns(job, new ArrayList<Pair<Text, Text>>());
+		//AccumuloInputFormat.fetchColumns(job,columns);
 
 		//output format
 		GeoWaveOutputFormat.setAccumuloOperationsInfo(job, argv.zookeepers, argv.instanceName, argv.user, argv.pass, argv.osmNamespace);
+
+		AdapterStore as = new AccumuloAdapterStore(GeoWaveOutputFormat.getAccumuloOperations(job));
 		for (FeatureDataAdapter fda : FeatureDefinitionSet.featureAdapters.values()){
+			as.addAdapter(fda);
 			GeoWaveOutputFormat.addDataAdapter(job, fda);
 		}
 

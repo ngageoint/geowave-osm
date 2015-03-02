@@ -115,7 +115,7 @@ public class OsmProvider
 
 		//if we are missing portions geometry is invalid;  log it and return null
 		if (missingNodes.size() != 0) {
-			LOGGER.error("[2]Some of the nodes for Way: " + osmunion.Id + " were not present.  Nodes missing were: (" + String.join(",", missingNodes) + ")");
+			LOGGER.error("[2]Some of the nodes for Way: " + osmunion.Id + " were not present.  Nodes missing were: (" + String.join(",", missingNodes.toArray(new String[missingNodes.size()])) + ")");
 			return null;
 		} else {
 			LOGGER.info("[2]Successfully built way: " + osmunion.Id);
@@ -285,7 +285,7 @@ public class OsmProvider
 				i++;
 			}
 			if (missingIds.size() != 0){
-				LOGGER.error("Error building ring relation for relation: " + osmunion.Id + " missing values were: (" + String.join(",", missingIds) + ")");
+				LOGGER.error("Error building ring relation for relation: " + osmunion.Id + " missing values were: (" + String.join(",", missingIds.toArray(new String[missingIds.size()])) + ")");
 				return null;
 			}
 

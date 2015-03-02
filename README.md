@@ -13,13 +13,33 @@
 </a>
 
 #Note 
-###This code is not at a fully working state - refactor in progress.
+###This code is not fully operational
 
 GeoWave-OSM is intended to be a full data + services stack for the OSM ecosystem.
 
 More information in the design proposal @
 https://github.com/ngageoint/geowave/wiki/Support-Full-OSM-Stack-Toolchain
-	
+
+###Status
+- [ ] Bulk Ingest
+  - [x] PBF   
+  - [ ] OSM Xml
+- [ ] Diff Support
+  - [x] Change set files (formats same as bulk ingest) 
+  - [ ] Dirty notification / rendering updates
+- [x] Node/Way/Relation Persistence
+  - [x] Persistence of native node/way/relation model (mapped to accumulo)
+  - [x] Updateable (from diffs)
+  - [ ] Generation of diffs per timespan
+  - [x] Full Accumulo authorization support
+- [ ] Editing API (OSM v0.6)
+  - [ ] Integration with change/dirty notification for diff ingest
+  - [ ] Authorization integration
+- [ ] Simple Feature Generation	
+  -  [x] Map reduce jobs to create simple features from native node/way/relations
+  -  [x] Mapping configuration uses user submittable Imposm3 mapping file.
+  -  [ ] Integration into change/dirty notification for diffs and edits
+
 ## Pull Requests
 
 All pull request contributions to this project will be released under the Apache 2.0 license.  

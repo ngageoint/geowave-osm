@@ -1,4 +1,4 @@
-package mil.nga.giat.osm.mapreduce;
+package mil.nga.giat.osm.mapreduce.Convert;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -26,9 +26,10 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.opengis.feature.simple.SimpleFeature;
 
-public class OSMConversionMapper extends Mapper<Key, Value, Text, Text> {
+public class OldOSMConversionMapper
+		extends Mapper<Key, Value, Text, Text> {
 	
-	private static final Logger log = Logger.getLogger(OSMConversionMapper.class);
+	private static final Logger log = Logger.getLogger(OldOSMConversionMapper.class);
 	
 	private BasicAccumuloOperations _bao;
 	private AccumuloDataStore _geoWaveDataStore;
@@ -108,7 +109,7 @@ public class OSMConversionMapper extends Mapper<Key, Value, Text, Text> {
     				  roles.get(id).put(role, v);
     			  }
     		  }
-    		  List<SimpleFeature> feats = OSMFeatureBuilder.GetFeatures(_conn, _inputTable, _qualifier, tags, main, info, roles);
+    		  List<SimpleFeature> feats = OSMFeatureBuilder.getFeatures(_conn, _inputTable, _qualifier, tags, main, info, roles);
     		  if (feats != null){
 	    		  for (SimpleFeature sf : feats){
 	    			  if (sf != null) {

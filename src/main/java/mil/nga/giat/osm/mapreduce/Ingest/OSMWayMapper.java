@@ -1,13 +1,11 @@
-package mil.nga.giat.osm.mapreduce;
+package mil.nga.giat.osm.mapreduce.Ingest;
 
 import mil.nga.giat.osm.accumulo.osmschema.Schema;
 import mil.nga.giat.osm.types.generated.LongArray;
-import mil.nga.giat.osm.types.generated.Node;
 import mil.nga.giat.osm.types.generated.Primitive;
 import mil.nga.giat.osm.types.generated.Way;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.avro.mapred.AvroKey;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.io.NullWritable;
 
 import java.io.IOException;
@@ -27,19 +25,16 @@ public class OSMWayMapper extends OSMMapperBase<Way> {
         Way way = key.datum();
         Primitive p = way.getCommon();
 
+
+
         Mutation m = new Mutation(getIdHash(p.getId()));
+		//Mutation m = new Mutation(_longWriter.writeField(p.getId()));
+		//Mutation m = new Mutation(p.getId().toString());
 
         put(m, Schema.CF.WAY, Schema.CQ.ID, p.getId());
 
-
-        List<Long> allRefs = new ArrayList<>();
-        long lastRef = 0;
-        for (long r : way.getNodes()) {
-            lastRef += r;
-            allRefs.add(lastRef);
-        }
         LongArray lr = new LongArray();
-        lr.setIds(allRefs);
+        lr.setIds(way.getNodes());
 
         put(m, Schema.CF.WAY, Schema.CQ.REFERENCES, lr);
 

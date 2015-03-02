@@ -1,4 +1,4 @@
-package mil.nga.giat.osm.mapreduce;
+package mil.nga.giat.osm.mapreduce.Ingest;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -6,8 +6,6 @@ import mil.nga.giat.geowave.store.data.field.BasicWriter;
 import mil.nga.giat.osm.accumulo.osmschema.Schema;
 import mil.nga.giat.osm.types.TypeUtils;
 import mil.nga.giat.osm.types.generated.LongArray;
-import mil.nga.giat.osm.types.generated.Node;
-import mil.nga.giat.osm.types.generated.Primitive;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.avro.mapred.AvroKey;
@@ -21,13 +19,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Map;
 
 
 public class OSMMapperBase<T> extends Mapper<AvroKey<T>, NullWritable, Text, Mutation> {
 
     private static final Logger log = LoggerFactory.getLogger(OSMMapperBase.class);
-    protected final HashFunction _hf = Hashing.murmur3_128(1);
+
 
     protected final BasicWriter.LongWriter _longWriter = new BasicWriter.LongWriter();
     protected final BasicWriter.IntWriter _intWriter = new BasicWriter.IntWriter();
@@ -41,7 +38,7 @@ public class OSMMapperBase<T> extends Mapper<AvroKey<T>, NullWritable, Text, Mut
     protected Text _tableName = new Text("OSM");
 
     protected byte[] getIdHash(long id) {
-        return _hf.hashLong(id).asBytes();
+       return Schema.getIdHash(id);
     }
 
     protected void put(Mutation m, byte[] cf, byte[] cq, Long val) {

@@ -1,10 +1,8 @@
-package mil.nga.giat.osm.mapreduce;
+package mil.nga.giat.osm.mapreduce.Convert;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-
-import org.apache.accumulo.core.client.IteratorSetting;
 import org.apache.accumulo.core.client.mapreduce.AccumuloInputFormat;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Range;
@@ -18,26 +16,27 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 
-public class OSMConversionRunner extends Configured implements Tool {
-private static final Logger log = Logger.getLogger(OSMConversionRunner.class);
+public class OldOSMConversionRunner
+		extends Configured implements Tool {
+private static final Logger log = Logger.getLogger(OldOSMConversionRunner.class);
 	
 	public static void main(String[] args) throws Exception {
-		int res = ToolRunner.run(new Configuration(), new OSMConversionRunner(), args);
+		int res = ToolRunner.run(new Configuration(), new OldOSMConversionRunner(), args);
 		System.exit(res);
 	}
 
 	public static SortedSet<Range> getRanges(String p){
         SortedSet<Range> splits = new TreeSet<Range>();
-        
-        
+
+
 	        for (int i = 0; i <= 9; i ++){
-	        	
+
 	        	splits.add(Range.prefix(p + "_" + String.valueOf(i)));
 	        }
-        
+
         return splits;
 	}
-	
+
 	
 	@Override
 	public int run(String[] args) throws Exception {
@@ -65,7 +64,7 @@ private static final Logger log = Logger.getLogger(OSMConversionRunner.class);
 		conf.set("qualifier", "w");
         
 		Job job = Job.getInstance(conf,"OSM Conversion - Ways");
-		job.setJarByClass(OSMConversionRunner.class);
+		job.setJarByClass(OldOSMConversionRunner.class);
 		  
   	  
 		
@@ -88,7 +87,7 @@ private static final Logger log = Logger.getLogger(OSMConversionRunner.class);
         
         //mappper
 		
-        job.setMapperClass(OSMConversionMapper.class);
+        job.setMapperClass(OldOSMConversionMapper.class);
         
         //job.setMapOutputKeyClass(Text.class);
         //job.setMapOutputValueClass(Text.class);
@@ -116,7 +115,7 @@ private static final Logger log = Logger.getLogger(OSMConversionRunner.class);
     	
         conf.set("qualifier", "n");
 		job = Job.getInstance(conf,"OSM Conversion - Nodes");
-		job.setJarByClass(OSMConversionRunner.class);
+		job.setJarByClass(OldOSMConversionRunner.class);
 	
 		
 		AccumuloInputFormat.setConnectorInfo(job,user, new PasswordToken(pass));
@@ -136,7 +135,7 @@ private static final Logger log = Logger.getLogger(OSMConversionRunner.class);
         
         //mappper
 		
-        job.setMapperClass(OSMConversionMapper.class);
+        job.setMapperClass(OldOSMConversionMapper.class);
         
         //job.setMapOutputKeyClass(Text.class);
         //job.setMapOutputValueClass(Text.class);
@@ -164,7 +163,7 @@ private static final Logger log = Logger.getLogger(OSMConversionRunner.class);
         
         conf.set("qualifier", "r");
 		job = Job.getInstance(conf,"OSM Conversion - Relations");
-		job.setJarByClass(OSMConversionRunner.class);
+		job.setJarByClass(OldOSMConversionRunner.class);
         
         AccumuloInputFormat.setConnectorInfo(job,user, new PasswordToken(pass));
 		AccumuloInputFormat.setInputTableName(job, inputTable);
@@ -184,7 +183,7 @@ private static final Logger log = Logger.getLogger(OSMConversionRunner.class);
         
         //mappper
 		
-        job.setMapperClass(OSMConversionMapper.class);
+        job.setMapperClass(OldOSMConversionMapper.class);
         
         //job.setMapOutputKeyClass(Text.class);
         //job.setMapOutputValueClass(Text.class);

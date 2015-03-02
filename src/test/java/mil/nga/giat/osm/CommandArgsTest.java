@@ -11,7 +11,7 @@ public class CommandArgsTest {
 
 
     @Test
-    public void TestAccumuloArgumentParsing() {
+    public void testAccumuloArgumentParsing() {
 
         String z = "zookeeper1:port,zookeeper2:port";
         String i = "accumulo_instance";
@@ -27,7 +27,7 @@ public class CommandArgsTest {
 
 		String[] argv = buildArgsString(z, i, au, ap, n, v, in, out, nn, dropTable);
         final OSMCommandArgs osmArgs = new OSMCommandArgs();
-        final JCommander cmd = new JCommander(osmArgs, argv);
+        new JCommander(osmArgs, argv);
 
         Assert.assertEquals(dropTable, osmArgs.dropOSMData);
         Assert.assertEquals(z, osmArgs.zookeepers);

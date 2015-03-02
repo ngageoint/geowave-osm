@@ -36,7 +36,7 @@ public class OsmPbfParser
 
 	private static Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OsmPbfParser.class);
 
-	public void StageData(OSMCommandArgs args) throws IOException {
+	public void stageData(OSMCommandArgs args) throws IOException {
 		final OSMCommandArgs arg = args;
 		final Configuration conf = new Configuration();
 		conf.set("fs.default.name", "hdfs://" + args.nameNode);
@@ -316,9 +316,14 @@ public class OsmPbfParser
 			p.setVersion((long)info.getVersion());
 			p.setTimestamp(info.getTimestamp());
 			p.setUserId((long) info.getUid());
-			p.setUserName(getStringById(info.getUid()));
-			p.setChangesetId(info.getChangeset());
-			p.setVisible(info.getVisible());
+			try {
+				p.setUserName(getStringById(info.getUid()));
+			} catch (Exception ex) {
+				LOGGER.warn("Error, input file doesn't contain a valid string table for user id: " + info.getUid());
+				p.setUserName(String.valueOf(info.getUid()));
+			}
+				p.setChangesetId(info.getChangeset());
+				p.setVisible(info.getVisible());
 			return p;
 		}
 	}

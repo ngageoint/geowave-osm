@@ -1,4 +1,4 @@
-package mil.nga.giat.osm.mapreduce;
+package mil.nga.giat.osm.mapreduce.Ingest;
 
 import com.beust.jcommander.JCommander;
 import mil.nga.giat.geowave.accumulo.BasicAccumuloOperations;
@@ -27,15 +27,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class OSMPBFRunner extends Configured implements Tool {
-    private static final Logger log = LoggerFactory.getLogger(OSMPBFRunner.class);
+public class OSMRunner
+		extends Configured implements Tool {
+    private static final Logger log = LoggerFactory.getLogger(OSMRunner.class);
     private org.apache.avro.Schema avroSchema = null;
     private String inputAvroFile = null;
 
     public static void main(String[] args) throws Exception {
         OSMMapperCommandArgs argv = new OSMMapperCommandArgs();
-        JCommander cmd = new JCommander(argv, args);
-        OSMPBFRunner runner = new OSMPBFRunner();
+        new JCommander(argv, args);
+        OSMRunner runner = new OSMRunner();
 
         int res = ToolRunner.run(new Configuration(), runner, args);
         System.exit(res);
@@ -58,14 +59,14 @@ public class OSMPBFRunner extends Configured implements Tool {
     public int run(String[] args) throws Exception {
 
         OSMMapperCommandArgs argv = new OSMMapperCommandArgs();
-        JCommander cmd = new JCommander(argv, args);
+        new JCommander(argv, args);
         Configuration conf = this.getConf();
-        conf.set("tableName", argv.GetQualifiedTableName());
+        conf.set("tableName", argv.getQualifiedTableName());
         conf.set("osmVisibility", argv.visibility);
 
         //job settings
         Job job = Job.getInstance(conf, argv.jobName);
-        job.setJarByClass(OSMPBFRunner.class);
+        job.setJarByClass(OSMRunner.class);
 
         switch (argv.mapperType){
             case "NODE": {
@@ -108,7 +109,7 @@ public class OSMPBFRunner extends Configured implements Tool {
         job.setOutputFormatClass(AccumuloOutputFormat.class);
         AccumuloOutputFormat.setConnectorInfo(job, argv.user, new PasswordToken(argv.pass));
         AccumuloOutputFormat.setCreateTables(job, true);
-        AccumuloOutputFormat.setDefaultTableName(job, argv.GetQualifiedTableName());
+        AccumuloOutputFormat.setDefaultTableName(job, argv.getQualifiedTableName());
         AccumuloOutputFormat.setZooKeeperInstance(job, new ClientConfiguration().withInstance(argv.instanceName).withZkHosts(argv.zookeepers));
 
         //reducer

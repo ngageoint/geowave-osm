@@ -12,6 +12,9 @@ public class ColumnQualifierTest {
     @Test(expected=NullPointerException.class)
     public void TAG_QUALIFIER_NULL() throws Exception {
         byte[] bytes = Schema.CQ.TAG_QUALIFIER(null);
+		if (bytes != null){
+			Assert.fail("returned non null value back; execution path should never be seen");
+		}
     }
 
     @Test

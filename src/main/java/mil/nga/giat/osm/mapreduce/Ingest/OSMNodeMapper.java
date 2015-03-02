@@ -1,4 +1,4 @@
-package mil.nga.giat.osm.mapreduce;
+package mil.nga.giat.osm.mapreduce.Ingest;
 
 
 import mil.nga.giat.osm.accumulo.osmschema.Schema;
@@ -25,7 +25,9 @@ public class OSMNodeMapper extends OSMMapperBase<Node>  {
         Node node = key.datum();
         Primitive p = node.getCommon();
 
-        Mutation m = new Mutation(getIdHash(p.getId()));
+       	Mutation m = new Mutation(getIdHash(p.getId()));
+		//Mutation m = new Mutation(_longWriter.writeField(p.getId()));
+		//Mutation m = new Mutation(p.getId().toString());
 
         put(m, Schema.CF.NODE, Schema.CQ.ID, p.getId());
         put(m, Schema.CF.NODE, Schema.CQ.LONGITUDE, node.getLongitude());

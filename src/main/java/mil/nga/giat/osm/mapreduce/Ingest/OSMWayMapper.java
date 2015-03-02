@@ -25,19 +25,16 @@ public class OSMWayMapper extends OSMMapperBase<Way> {
         Way way = key.datum();
         Primitive p = way.getCommon();
 
+
+
         Mutation m = new Mutation(getIdHash(p.getId()));
+		//Mutation m = new Mutation(_longWriter.writeField(p.getId()));
+		//Mutation m = new Mutation(p.getId().toString());
 
         put(m, Schema.CF.WAY, Schema.CQ.ID, p.getId());
 
-
-        List<Long> allRefs = new ArrayList<>();
-        long lastRef = 0;
-        for (long r : way.getNodes()) {
-            lastRef += r;
-            allRefs.add(lastRef);
-        }
         LongArray lr = new LongArray();
-        lr.setIds(allRefs);
+        lr.setIds(way.getNodes());
 
         put(m, Schema.CF.WAY, Schema.CQ.REFERENCES, lr);
 

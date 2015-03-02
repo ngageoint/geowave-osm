@@ -8,6 +8,8 @@ import mil.nga.giat.geowave.ingest.hdfs.mapreduce.AbstractMapReduceIngest;
 import mil.nga.giat.geowave.ingest.hdfs.mapreduce.IngestWithMapper;
 import mil.nga.giat.geowave.store.data.field.BasicReader;
 import mil.nga.giat.geowave.store.data.field.BasicWriter;
+import mil.nga.giat.osm.mapreduce.Convert.OsmProvider.OsmProvider;
+import mil.nga.giat.osm.mapreduce.Ingest.OSMMapperCommandArgs;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.iterators.user.WholeRowIterator;
@@ -24,6 +26,7 @@ public class OSMConversionMapper extends Mapper<Key, Value, GeoWaveOutputKey, Ob
 	private ByteArrayId indexId = null;
 	private String globalVisibility = "";
 	private final SimpleFeatureGenerator sfg = new SimpleFeatureGenerator();
+	private OsmProvider osmProvider = null;
 
 
 
@@ -31,10 +34,24 @@ public class OSMConversionMapper extends Mapper<Key, Value, GeoWaveOutputKey, Ob
 			throws IOException, InterruptedException {
 		ByteArrayId adapterId = null;
 
-		List<SimpleFeature> sf = sfg.mapOSMtoSimpleFeature(WholeRowIterator.decodeRow(key, value));
+		List<SimpleFeature> sf = sfg.mapOSMtoSimpleFeature(WholeRowIterator.decodeRow(key, value), osmProvider);
+		if (sf != null){
+			for (SimpleFeature feat : sf){
+				//context.write(new GeoWaveOutputKey(adapterId, indexId), sf);
+			}
+		}
 
 
-		//context.write(new GeoWaveOutputKey(adapterId, indexId), sf);
+
+
+	}
+
+
+	@Override
+	protected void cleanup(Context context
+	) throws IOException, InterruptedException {
+		osmProvider.close();
+		super.cleanup(context);
 	}
 
 	@Override protected void setup( Context context )
@@ -49,6 +66,9 @@ public class OSMConversionMapper extends Mapper<Key, Value, GeoWaveOutputKey, Ob
 				indexId = new ByteArrayId(
 						primaryIndexIdStr);
 			}
+			OSMMapperCommandArgs args = new OSMMapperCommandArgs();
+			args.deserializeFromString(context.getConfiguration().get("arguments"));
+			osmProvider = new OsmProvider(args);
 		}
 		catch (final Exception e) {
 			throw new IllegalArgumentException(

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 public class OSMMapperCommandArgs {
 
@@ -25,6 +26,8 @@ public class OSMMapperCommandArgs {
         this.jobName = jobName;
         this.mapperType = mapperType;
     }
+
+	private String separator = "|||";
 
     @Parameter(names = {"-z","--zookeepers"} , required = false, description = "list of zookeeper:port instances, comma separated")
     public String zookeepers;
@@ -90,6 +93,28 @@ public class OSMMapperCommandArgs {
 
 	public String getMappingContents(){
 		return mappingContents;
+	}
+
+
+	public String serializeToString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(zookeepers).append(separator).append(instanceName).append(separator).append(user).append(separator).append(pass).append(separator)
+				.append(osmNamespace).append(separator).append(visibility).append(separator).append(hdfsBasePath).append(separator).append(jobName)
+				.append(separator).append(mapperType);
+		return sb.toString();
+	}
+
+	public void deserializeFromString(String ser){
+		String[] settings = ser.split(Pattern.quote(separator));
+		zookeepers = settings[0];
+		instanceName = settings[1];
+		user = settings[2];
+		pass = settings[3];
+		osmNamespace  = settings[4];
+		visibility = settings[5];
+		hdfsBasePath = settings[6];
+		jobName = settings[7];
+		mapperType = settings[8];
 	}
 
 

@@ -33,7 +33,7 @@ public class MapReduceIT
 
 
 	protected static final String TEST_RESOURCE_DIR = new File("./src/test/data/").getAbsolutePath().toString();
-	protected static final String TEST_DATA_ZIP_RESOURCE_PATH = TEST_RESOURCE_DIR + "/" + "hangzhou_china.zip";
+	protected static final String TEST_DATA_ZIP_RESOURCE_PATH = TEST_RESOURCE_DIR + "/" + "andorra-latest.zip";
 	protected static final String TEST_DATA_BASE_DIR = new File("./target/data/").getAbsoluteFile().toString();
 
 
@@ -98,6 +98,9 @@ public class MapReduceIT
 		argv = new String[] {"-z", zookeeper, "-i", accumuloInstance, "-au", accumuloUser, "-ap", accumuloPassword, "-n", "osmnamespace", "-v", "public", "-out", args.hdfsBasePath, "-jn", "ConversionTest", "-t", "RELATION"};
 		ToolRunner.run(CONF, new OSMConversionRunner(), argv);
 		System.out.println("finished conversion");
+		System.out.println("**************************************************");
+		System.out.println("**************************************************");
+		System.out.println("**************************************************");
 
 	}
 

@@ -61,6 +61,7 @@ public class OSMConversionRunner
 		new JCommander(argv, args);
 		Configuration conf = this.getConf();
 		conf.set("osm_mapping", argv.getMappingContents());
+		conf.set("arguments", argv.serializeToString());
 
 		if (argv.visibility != null) {
 			conf.set(
@@ -85,7 +86,7 @@ public class OSMConversionRunner
 		job.setInputFormatClass(AccumuloInputFormat.class);
 		Range r = new Range();
 		ArrayList<Pair<Text, Text>> columns = new ArrayList<>();
-		columns.add(new Pair<>(new Text(Schema.CF.NODE), new Text()));
+		//columns.add(new Pair<>(new Text(Schema.CF.NODE), new Text()));
 
 		AccumuloInputFormat.setRanges(job, Arrays.asList(r));
 		//AccumuloInputFormat.fetchColumns(job,columns);

@@ -23,12 +23,14 @@ public class OSMRelationMapper extends OSMMapperBase<Relation> {
         Primitive p = relation.getCommon();
 
         Mutation m = new Mutation(getIdHash(p.getId()));
+		//Mutation m = new Mutation(_longWriter.writeField(p.getId()));
+		//Mutation m = new Mutation(p.getId().toString());
 
         put(m, Schema.CF.RELATION, Schema.CQ.ID, p.getId());
 
         int i = 0;
         for (RelationMember rm : relation.getMembers()) {
-            put(m, Schema.CF.RELATION, Schema.CQ.getRelationMember(Schema.CQ.REFERENCE_ROLEID_PREFIX,i), rm.getRole());
+			put(m, Schema.CF.RELATION, Schema.CQ.getRelationMember(Schema.CQ.REFERENCE_ROLEID_PREFIX,i), rm.getRole());
             put(m, Schema.CF.RELATION, Schema.CQ.getRelationMember(Schema.CQ.REFERENCE_MEMID_PREFIX,i), rm.getMember());
             put(m, Schema.CF.RELATION, Schema.CQ.getRelationMember(Schema.CQ.REFERENCE_TYPE_PREFIX,i), rm.getMemberType().toString());
             i++;

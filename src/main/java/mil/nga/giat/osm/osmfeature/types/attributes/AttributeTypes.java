@@ -20,6 +20,8 @@ public class AttributeTypes
 		AttributeDefinitionCache.put(Long.class, new LongAttributeType());
 		AttributeDefinitionCache.put(Integer.class, new IntegerAttributeType());
 		AttributeDefinitionCache.put(Boolean.class, new BooleanAttributeType());
+		AttributeDefinitionCache.put(Integer.class, new IntegerAttributeType());
+		AttributeDefinitionCache.put(Short.class, new ShortAttributeType());
 	}
 
 	public static AttributeType getAttributeType(String imposm3TypeName){
@@ -53,6 +55,9 @@ public class AttributeTypes
 			}
 			case "mapping_key" : {
 				return AttributeDefinitionCache.get(String.class);
+			}
+			case "integer" : {
+				return AttributeDefinitionCache.get(Integer.class);
 			}
 		}
 		return null;

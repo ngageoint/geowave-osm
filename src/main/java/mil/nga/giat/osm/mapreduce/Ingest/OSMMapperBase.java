@@ -24,7 +24,7 @@ import java.util.Calendar;
 public class OSMMapperBase<T> extends Mapper<AvroKey<T>, NullWritable, Text, Mutation> {
 
     private static final Logger log = LoggerFactory.getLogger(OSMMapperBase.class);
-    protected final HashFunction _hf = Hashing.murmur3_128(1);
+
 
     protected final BasicWriter.LongWriter _longWriter = new BasicWriter.LongWriter();
     protected final BasicWriter.IntWriter _intWriter = new BasicWriter.IntWriter();
@@ -38,7 +38,7 @@ public class OSMMapperBase<T> extends Mapper<AvroKey<T>, NullWritable, Text, Mut
     protected Text _tableName = new Text("OSM");
 
     protected byte[] getIdHash(long id) {
-        return _hf.hashLong(id).asBytes();
+       return Schema.getIdHash(id);
     }
 
     protected void put(Mutation m, byte[] cf, byte[] cq, Long val) {

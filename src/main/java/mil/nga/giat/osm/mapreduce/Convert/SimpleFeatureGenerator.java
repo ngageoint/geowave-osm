@@ -6,6 +6,7 @@ import mil.nga.giat.geowave.index.StringUtils;
 import mil.nga.giat.geowave.store.GeometryUtils;
 import mil.nga.giat.geowave.store.data.field.BasicReader;
 import mil.nga.giat.osm.accumulo.osmschema.Schema;
+import mil.nga.giat.osm.mapreduce.Convert.OsmProvider.OsmProvider;
 import mil.nga.giat.osm.osmfeature.types.attributes.AttributeDefinition;
 import mil.nga.giat.osm.osmfeature.types.attributes.AttributeTypes;
 import mil.nga.giat.osm.osmfeature.types.features.FeatureDefinition;
@@ -13,6 +14,7 @@ import mil.nga.giat.osm.osmfeature.types.features.FeatureDefinitionSet;
 import mil.nga.giat.osm.osmfeature.types.features.FeatureType;
 import mil.nga.giat.osm.types.TypeUtils;
 import mil.nga.giat.osm.types.generated.MemberType;
+import mil.nga.giat.osm.types.generated.Relation;
 import org.apache.accumulo.core.data.ByteSequence;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Value;
@@ -35,7 +37,7 @@ public class SimpleFeatureGenerator
 
 
 
-	public List<SimpleFeature> mapOSMtoSimpleFeature(Map<Key, Value> items){
+	public List<SimpleFeature> mapOSMtoSimpleFeature(Map<Key, Value> items, OsmProvider osmProvider){
 
 		List<SimpleFeature> features = new ArrayList<>();
 		OSMUnion osmunion = new OSMUnion(items);
@@ -72,7 +74,7 @@ public class SimpleFeatureGenerator
 				continue;
 			}
 
-			System.out.println("Matched: " + osmunion.Id);
+			//System.out.println("Matched: " + osmunion.Id);
 
 				// feature matches this osm entry, let's being
 
@@ -83,17 +85,24 @@ public class SimpleFeatureGenerator
 					if (ad.Type.equals("id")){
 						sfb.set(FeatureDefinitionSet.normalizeOsmNames(ad.Name), ad.convert(osmunion.Id));
 					} else if (ad.Type.equals("geometry")){
-						sfb.set(FeatureDefinitionSet.normalizeOsmNames(ad.Name), getGeometry(osmunion));
+						Geometry geom = getGeometry(osmunion, osmProvider, fd);
+						if (geom == null){
+							return null;
+						}
+						sfb.set(FeatureDefinitionSet.normalizeOsmNames(ad.Name), geom);
 					} else if (ad.Type.equals("mapping_value")){
 						sfb.set(FeatureDefinitionSet.normalizeOsmNames(ad.Name), ad.convert(mappingVal));
 					} else if (ad.Type.equals("mapping_key")){
 						sfb.set(FeatureDefinitionSet.normalizeOsmNames(ad.Name), ad.convert(subMappingVal));
 					} else if (ad.Key != null && !ad.Key.equals("null")) {
 						if (osmunion.tags.containsKey(ad.Key)) {
-							sfb.set(FeatureDefinitionSet.normalizeOsmNames(ad.Name), ad.convert(osmunion.tags.get(ad.Key)));
+							try {
+								sfb.set(FeatureDefinitionSet.normalizeOsmNames(ad.Name), ad.convert(osmunion.tags.get(ad.Key)));
+							} catch (Exception e) {
+								System.out.println(e.toString());
+							}
 						}
 					}
-
 				}
 			features.add(sfb.buildFeature(String.valueOf(osmunion.Id) + osmunion.OsmType.toString()));
 		}
@@ -103,18 +112,16 @@ public class SimpleFeatureGenerator
 	}
 
 
-	private static Geometry getGeometry(OSMUnion osm){
+	private static Geometry getGeometry(OSMUnion osm, OsmProvider provider, FeatureDefinition fd){
 		switch (osm.OsmType){
 			case NODE: {
 				return GeometryUtils.GEOMETRY_FACTORY.createPoint(new Coordinate(osm.Longitude, osm.Lattitude));
 			}
 			case RELATION: {
-				System.out.println("Relations not supported yet");
-				return null;
+				return provider.processRelation(osm, fd);
 			}
 			case WAY: {
-				System.out.println("Ways not supported yet");
-				return null;
+				return provider.processWay(osm, fd);
 			}
 		}
 		return null;
@@ -122,11 +129,11 @@ public class SimpleFeatureGenerator
 
 
 
-	private static enum OSMType{
+	public static enum OSMType{
 		NODE, WAY, RELATION, UNSET
 	}
 
-	private static class OSMUnion{
+	public static class OSMUnion{
 
 		private final static Logger log = LoggerFactory.getLogger(OSMUnion.class);
 
@@ -169,43 +176,43 @@ public class SimpleFeatureGenerator
 			for (Map.Entry<Key, Value> item : osm.entrySet()){
 				if (OsmType.equals(OSMType.UNSET)){
 					ByteSequence CF = item.getKey().getColumnFamilyData();
-					if (arraysEqual(CF, Schema.CF.NODE)){
+					if (Schema.arraysEqual(CF, Schema.CF.NODE)){
 						OsmType = OSMType.NODE;
-					} else if (arraysEqual(CF, Schema.CF.WAY)){
+					} else if (Schema.arraysEqual(CF, Schema.CF.WAY)){
 						OsmType = OSMType.WAY;
-					} else if (arraysEqual(CF, Schema.CF.RELATION)){
+					} else if (Schema.arraysEqual(CF, Schema.CF.RELATION)){
 						OsmType = OSMType.RELATION;
 					}
 				}
 
 				ByteSequence CQ = item.getKey().getColumnQualifierData();
-				if (arraysEqual(CQ, Schema.CQ.ID)){
+				if (Schema.arraysEqual(CQ, Schema.CQ.ID)){
 					Id = _longReader.readField(item.getValue().get());
-				} else if (arraysEqual(CQ, Schema.CQ.VERSION)){
+				} else if (Schema.arraysEqual(CQ, Schema.CQ.VERSION)){
 					Version = _longReader.readField(item.getValue().get());
-				} else if (arraysEqual(CQ, Schema.CQ.TIMESTAMP)){
+				} else if (Schema.arraysEqual(CQ, Schema.CQ.TIMESTAMP)){
 					Timestamp = _longReader.readField(item.getValue().get());
-				} else if (arraysEqual(CQ, Schema.CQ.CHANGESET)){
+				} else if (Schema.arraysEqual(CQ, Schema.CQ.CHANGESET)){
 					Changeset = _longReader.readField(item.getValue().get());
-				} else if (arraysEqual(CQ, Schema.CQ.USER_ID)){
+				} else if (Schema.arraysEqual(CQ, Schema.CQ.USER_ID)){
 					UserId  = _longReader.readField(item.getValue().get());
-				} else if (arraysEqual(CQ, Schema.CQ.USER_TEXT)){
+				} else if (Schema.arraysEqual(CQ, Schema.CQ.USER_TEXT)){
 					UserName = _stringReader.readField(item.getValue().get());
-				} else if (arraysEqual(CQ, Schema.CQ.OSM_VISIBILITY)){
+				} else if (Schema.arraysEqual(CQ, Schema.CQ.OSM_VISIBILITY)){
 					Visible = _booleanReader.readField(item.getValue().get());
-				} else if (arraysEqual(CQ, Schema.CQ.LATITUDE)){
+				} else if (Schema.arraysEqual(CQ, Schema.CQ.LATITUDE)){
 					Lattitude = _doubleReader.readField(item.getValue().get());
-				} else if (arraysEqual(CQ, Schema.CQ.LONGITUDE)){
+				} else if (Schema.arraysEqual(CQ, Schema.CQ.LONGITUDE)){
 					Longitude = _doubleReader.readField(item.getValue().get());
 				}
-				else if (arraysEqual(CQ, Schema.CQ.REFERENCES)){
+				else if (Schema.arraysEqual(CQ, Schema.CQ.REFERENCES)){
 					try {
 						Nodes = TypeUtils.deserializeLongArray(item.getValue().get(), null).getIds();
 					}
 					catch (IOException e) {
 						log.error("Error deserializing Avro encoded Relation member set", e);
 					}
-				} else if (startsWith(CQ, Schema.CQ.REFERENCE_MEMID_PREFIX.getBytes(Schema.CHARSET))){
+				} else if (Schema.startsWith(CQ, Schema.CQ.REFERENCE_MEMID_PREFIX.getBytes(Schema.CHARSET))){
 					String s = new String(CQ.toArray());
 					Integer id = Integer.valueOf(s.split("_")[1]);
 					if (relationSets == null){
@@ -215,7 +222,7 @@ public class SimpleFeatureGenerator
 						relationSets.put(id, new RelationSet());
 					}
 					relationSets.get(id).MemId = _longReader.readField(item.getValue().get());
-				} else if (startsWith(CQ, Schema.CQ.REFERENCE_ROLEID_PREFIX.getBytes(Schema.CHARSET))){
+				} else if (Schema.startsWith(CQ, Schema.CQ.REFERENCE_ROLEID_PREFIX.getBytes(Schema.CHARSET))){
 					String s = new String(CQ.toArray());
 					Integer id = Integer.valueOf(s.split("_")[1]);
 					if (relationSets == null){
@@ -225,7 +232,7 @@ public class SimpleFeatureGenerator
 						relationSets.put(id, new RelationSet());
 					}
 					relationSets.get(id).RoleId = _stringReader.readField(item.getValue().get());
-				} else if (startsWith(CQ, Schema.CQ.REFERENCE_TYPE_PREFIX.getBytes(Schema.CHARSET))){
+				} else if (Schema.startsWith(CQ, Schema.CQ.REFERENCE_TYPE_PREFIX.getBytes(Schema.CHARSET))){
 					String s = new String(CQ.toArray());
 					Integer id = Integer.valueOf(s.split("_")[1]);
 					if (relationSets == null){
@@ -234,7 +241,20 @@ public class SimpleFeatureGenerator
 					if (!relationSets.containsKey(id)){
 						relationSets.put(id, new RelationSet());
 					}
-					relationSets.get(id).MemType = _stringReader.readField(item.getValue().get());
+					switch (_stringReader.readField(item.getValue().get())){
+						case "NODE" :{
+							relationSets.get(id).MemType = MemberType.NODE;
+							break;
+						}
+						case "WAY" : {
+							relationSets.get(id).MemType = MemberType.WAY;
+							break;
+						}
+						case "RELATION" : {
+							relationSets.get(id).MemType = MemberType.RELATION;
+							break;
+						}
+					}
 				} else {
 					// these should all be tags
 					if (tags == null){
@@ -265,34 +285,15 @@ public class SimpleFeatureGenerator
 
 
 
-	private static class RelationSet{
+	public static class RelationSet{
 		public String RoleId = null;
 		public Long MemId = null;
-		public String MemType = null;
+		public MemberType MemType = null;
 	}
 
 
 
 
-	private static boolean arraysEqual(ByteSequence array, byte[] value){
-		if (value.length != array.length()){
-			return false;
-		}
-		return startsWith(array, value);
-	}
-
-	private static boolean startsWith(ByteSequence array, byte[] prefix){
-		if (prefix.length > array.length()) {
-			return false;
-		}
-
-		for (int i = 0; i < prefix.length; i++){
-			if (prefix[i] != array.byteAt(i)){
-				return false;
-			}
-		}
-		return true;
-	}
 
 
 }

@@ -80,9 +80,12 @@ public class FeatureDefinitionSet {
 				geomClass = Polygon.class;
 			}
 		}
-		sftb.add(atb.binding(geomClass).nillable(false).buildDescriptor("geom"));
+		sftb.add(atb.binding(geomClass).nillable(false).buildDescriptor("geometry"));
 		for (AttributeDefinition ad : fd.Attributes){
 			AttributeType at = AttributeTypes.getAttributeType(ad.Type);
+			if (ad.Name == null){
+				System.out.println("yo");
+			}
 			if (at != null){
 				sftb.add(atb.binding(at.getClassType()).nillable(true).buildDescriptor(normalizeOsmNames(ad.Name)));
 			}

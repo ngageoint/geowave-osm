@@ -27,7 +27,7 @@ https://github.com/ngageoint/geowave/wiki/Support-Full-OSM-Stack-Toolchain
 - [ ] Diff Support
   - [x] Change set files (formats same as bulk ingest) 
   - [ ] Dirty notification / rendering updates
-- [x] Node/Way/Relation Persistence
+- [ ] Node/Way/Relation Persistence
   - [x] Persistence of native node/way/relation model (mapped to accumulo)
   - [x] Updateable (from diffs)
   - [ ] Generation of diffs per timespan

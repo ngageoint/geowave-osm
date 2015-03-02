@@ -22,8 +22,8 @@
 	<properties>
 		<geotools.version>12.1</geotools.version>
 		<geoserver.version>2.6.1</geoserver.version>
-		<accumulo.version>1.6.1</accumulo.version>
-		<hadoop.version>2.5.0-cdh5.2.0</hadoop.version>
+		<accumulo.version>1.6.2</accumulo.version>
+		<hadoop.version>2.6.0</hadoop.version>
 		<avro.version>1.7.6</avro.version>
 		<jcommander.version>1.32</jcommander.version>
 		<geotools.scope>compile</geotools.scope>

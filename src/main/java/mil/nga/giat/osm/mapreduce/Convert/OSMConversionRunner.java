@@ -97,11 +97,11 @@ public class OSMConversionRunner
 		AdapterStore as = new AccumuloAdapterStore(GeoWaveOutputFormat.getAccumuloOperations(job));
 		for (FeatureDataAdapter fda : FeatureDefinitionSet.featureAdapters.values()){
 			as.addAdapter(fda);
-			GeoWaveOutputFormat.addDataAdapter(job, fda);
+			GeoWaveOutputFormat.addDataAdapter(job.getConfiguration(), fda);
 		}
 
 		Index primaryIndex = IndexType.SPATIAL_RASTER.createDefaultIndex();
-		GeoWaveOutputFormat.addIndex(job, primaryIndex);
+		GeoWaveOutputFormat.addIndex(job.getConfiguration(), primaryIndex);
 		conf.set(AbstractMapReduceIngest.PRIMARY_INDEX_ID_KEY,
 				StringUtils.stringFromBinary(primaryIndex.getId().getBytes()));
 

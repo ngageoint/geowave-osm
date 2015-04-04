@@ -42,7 +42,7 @@
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<test.args>-Xms256m -Xmx1024m -XX:MaxPermSize=256m</test.args>
-		<geowave.version>0.8.3-SNAPSHOT</geowave.version>
+		<geowave.version>0.8.4-SNAPSHOT</geowave.version>
 		<junit.version>4.12</junit.version>
         <jackson.core.version>2.5.1</jackson.core.version>
 	</properties>

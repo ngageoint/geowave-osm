@@ -60,19 +60,22 @@ public class OSMConversionRunner
 		OSMMapperCommandArgs argv = new OSMMapperCommandArgs();
 		new JCommander(argv, args);
 		Configuration conf = this.getConf();
-		conf.set("osm_mapping", argv.getMappingContents());
-		conf.set("arguments", argv.serializeToString());
 
-		if (argv.visibility != null) {
-			conf.set(
-					AbstractMapReduceIngest.GLOBAL_VISIBILITY_KEY,
-					argv.visibility);
-		}
+
 
 		//job settings
 
 		Job job = Job.getInstance(conf, argv.jobName + "NodeConversion");
 		job.setJarByClass(OSMConversionRunner.class);
+
+        job.getConfiguration().set("osm_mapping", argv.getMappingContents());
+        job.getConfiguration().set("arguments", argv.serializeToString());
+
+        if (argv.visibility != null) {
+            job.getConfiguration().set(
+                    AbstractMapReduceIngest.GLOBAL_VISIBILITY_KEY,
+                    argv.visibility);
+        }
 
 		//input format
 
@@ -86,10 +89,7 @@ public class OSMConversionRunner
 		job.setInputFormatClass(AccumuloInputFormat.class);
 		Range r = new Range();
 		ArrayList<Pair<Text, Text>> columns = new ArrayList<>();
-		//columns.add(new Pair<>(new Text(Schema.CF.NODE), new Text()));
-
 		AccumuloInputFormat.setRanges(job, Arrays.asList(r));
-		//AccumuloInputFormat.fetchColumns(job,columns);
 
 		//output format
 		GeoWaveOutputFormat.setAccumuloOperationsInfo(job, argv.zookeepers, argv.instanceName, argv.user, argv.pass, argv.osmNamespace);
@@ -102,8 +102,8 @@ public class OSMConversionRunner
 
 		Index primaryIndex = IndexType.SPATIAL_RASTER.createDefaultIndex();
 		GeoWaveOutputFormat.addIndex(job.getConfiguration(), primaryIndex);
-		conf.set(AbstractMapReduceIngest.PRIMARY_INDEX_ID_KEY,
-				StringUtils.stringFromBinary(primaryIndex.getId().getBytes()));
+		job.getConfiguration().set(AbstractMapReduceIngest.PRIMARY_INDEX_ID_KEY,
+                StringUtils.stringFromBinary(primaryIndex.getId().getBytes()));
 
 		job.setOutputFormatClass(GeoWaveOutputFormat.class);
 		job.setMapOutputKeyClass(GeoWaveOutputKey.class);
@@ -115,6 +115,7 @@ public class OSMConversionRunner
 
 		//reducer
 		job.setNumReduceTasks(0);
+
 
 		return job.waitForCompletion(true) ? 0 : -1;
 	}

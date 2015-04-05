@@ -22,6 +22,7 @@ public class AttributeTypes
 		AttributeDefinitionCache.put(Boolean.class, new BooleanAttributeType());
 		AttributeDefinitionCache.put(Integer.class, new IntegerAttributeType());
 		AttributeDefinitionCache.put(Short.class, new ShortAttributeType());
+        AttributeDefinitionCache.put(Geometry.class, new GeometryAttributeType());
 	}
 
 	public static AttributeType getAttributeType(String imposm3TypeName){
@@ -51,7 +52,7 @@ public class AttributeTypes
 				return AttributeDefinitionCache.get(Boolean.class);
 			}
 			case "direction" : {
-				return AttributeDefinitionCache.get(Short.class);
+				return AttributeDefinitionCache.get(String.class);
 			}
 			case "mapping_key" : {
 				return AttributeDefinitionCache.get(String.class);
@@ -59,6 +60,12 @@ public class AttributeTypes
 			case "integer" : {
 				return AttributeDefinitionCache.get(Integer.class);
 			}
+            case "geometry" : {
+                return AttributeDefinitionCache.get(Geometry.class);
+            }
+            case "validated_geometry" : {
+                return AttributeDefinitionCache.get(Geometry.class);
+            }
 		}
 		return null;
 	}
@@ -135,6 +142,24 @@ public class AttributeTypes
 	}
 
 
+    private static class GeometryAttributeType implements AttributeType<Geometry>{
+
+        @Override
+        public Geometry convert(Object source) {
+            if (source instanceof Geometry){
+                return (Geometry) source;
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public Class getClassType() {
+            return Geometry.class;
+        }
+    }
+
+
 	private static class ShortAttributeType implements AttributeType<Short> {
 		@Override
 		public Short convert( Object source ) {
@@ -158,7 +183,7 @@ public class AttributeTypes
 		@Override
 		public Boolean convert( Object source ) {
 			if (source == null){
-				return null;
+				return false;
 			}
 			if (source instanceof Boolean) {
 				return (Boolean) source;
@@ -171,10 +196,10 @@ public class AttributeTypes
 				return false;
 			}
 			if (val ==null){
-				val = "<NULL>";
+				return false;
 			}
-			log.error("Unable to parse value: " + val + " as boolean");
-			throw new IllegalArgumentException("Value: " + val + " was not a valid boolean value");
+			log.warn("Unable to parse value: " + val + " as boolean, defaulting to true based on presence of value");
+            return true;
 		}
 
 		@Override

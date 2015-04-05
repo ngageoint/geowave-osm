@@ -15,6 +15,7 @@ public class FeatureDefinition {
 	public final List<AttributeDefinition> Attributes = new ArrayList<>();
 	public final List<Map<String, List<String>>> Filters = new ArrayList<>();
 	public final List<String> MappingKeys = new ArrayList<>();
+    private static final String WILDCARD_ATTRIBUTE = "__any__";
 
 	public String getMappingName() {
 		for (AttributeDefinition ad : Attributes){
@@ -54,7 +55,7 @@ public class FeatureDefinition {
 
 	public boolean isMappedValue(String val){
 		for (Map.Entry<String, List<String>> map : Mappings.entrySet()){
-			if (map.getValue().contains(val)){
+			if (map.getValue().contains(WILDCARD_ATTRIBUTE) || map.getValue().contains(val)){
 				return true;
 			}
 		}
@@ -66,9 +67,9 @@ public class FeatureDefinition {
 		for (Map.Entry<String, List<Map<String, List<String>>>> m : SubMappings.entrySet()){
 			for (Map<String, List<String>> m2 : m.getValue()){
 				for (Map.Entry<String, List<String>> m3 : m2.entrySet()){
-					if (m3.equals(key)) {
-						if (m3.getValue().contains(val)) {
-							return m.getKey();
+					if (m3.getKey().equals(key)) {
+						if (m3.getValue().contains(WILDCARD_ATTRIBUTE) || m3.getValue().contains(val)) {
+							return m3.getKey();
 						}
 					}
 				}

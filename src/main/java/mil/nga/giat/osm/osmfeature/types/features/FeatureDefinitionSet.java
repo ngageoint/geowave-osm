@@ -80,7 +80,7 @@ public class FeatureDefinitionSet {
 				geomClass = Polygon.class;
 			}
 		}
-		sftb.add(atb.binding(geomClass).nillable(false).buildDescriptor("geometry"));
+		//sftb.add(atb.binding(geomClass).nillable(false).buildDescriptor("geometry"));
 		for (AttributeDefinition ad : fd.Attributes){
 			AttributeType at = AttributeTypes.getAttributeType(ad.Type);
 			if (ad.Name == null){

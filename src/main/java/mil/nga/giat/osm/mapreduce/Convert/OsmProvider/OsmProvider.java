@@ -116,10 +116,8 @@ public class OsmProvider
 
 		//if we are missing portions geometry is invalid;  log it and return null
 		if (missingNodes.size() != 0) {
-			LOGGER.error("[2]Some of the nodes for Way: " + osmunion.Id + " were not present.  Nodes missing were: (" + Joiner.on(",").join(missingNodes) + ")");
+			LOGGER.error("Some of the nodes for Way: " + osmunion.Id + " were not present.  Nodes missing were: (" + Joiner.on(",").join(missingNodes) + ")");
 			return null;
-		} else {
-			LOGGER.info("[2]Successfully built way: " + osmunion.Id);
 		}
 
 		if (osmunion.Nodes.size() > 2 && osmunion.Nodes.get(0) == osmunion.Nodes.get(osmunion.Nodes.size() - 1)){

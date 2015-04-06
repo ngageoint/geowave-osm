@@ -67,6 +67,9 @@ public class FeatureConfigParser
 							fd.Type = FeatureType.Geometry;
 							break;
 						}
+                        case "validated_geometry" : {
+                            fd.Type = FeatureType.Geometry;
+                        }
 					}
 					break;
 				}
@@ -132,7 +135,7 @@ public class FeatureConfigParser
 						fd.SubMappings.put(mappingsKVP.getKey(), new ArrayList<Map<String, List<String>>>());
 					}
 					fd.SubMappings.get(mappingsKVP.getKey()).add(submapping);
-					fd.MappingKeys.add(mappingsKVP.getKey());
+					fd.MappingKeys.add(mappKVP.getKey());
 				}
 
 			}

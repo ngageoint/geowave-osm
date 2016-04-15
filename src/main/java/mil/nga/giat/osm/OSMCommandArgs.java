@@ -1,7 +1,6 @@
 package mil.nga.giat.osm;
 
 import com.beust.jcommander.Parameter;
-import org.apache.hadoop.fs.Path;
 
 public class OSMCommandArgs {
 

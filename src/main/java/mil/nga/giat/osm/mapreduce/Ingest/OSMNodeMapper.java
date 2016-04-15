@@ -1,17 +1,18 @@
 package mil.nga.giat.osm.mapreduce.Ingest;
 
 
-import mil.nga.giat.osm.accumulo.osmschema.Schema;
-import mil.nga.giat.osm.types.generated.Node;
-import mil.nga.giat.osm.types.generated.Primitive;
+import java.io.IOException;
+import java.util.Map;
+
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.hadoop.io.NullWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Map;
+import mil.nga.giat.osm.accumulo.osmschema.Schema;
+import mil.nga.giat.osm.types.generated.Node;
+import mil.nga.giat.osm.types.generated.Primitive;
 
 public class OSMNodeMapper extends OSMMapperBase<Node>  {
 

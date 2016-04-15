@@ -1,24 +1,22 @@
 package mil.nga.giat.osm.mapreduce.Ingest;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-import mil.nga.giat.geowave.store.data.field.BasicWriter;
-import mil.nga.giat.osm.accumulo.osmschema.Schema;
-import mil.nga.giat.osm.types.TypeUtils;
-import mil.nga.giat.osm.types.generated.LongArray;
+import java.io.IOException;
+import java.util.Calendar;
+
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Calendar;
+import mil.nga.giat.geowave.core.store.data.field.FieldUtils;
+import mil.nga.giat.geowave.core.store.data.field.FieldWriter;
+import mil.nga.giat.osm.accumulo.osmschema.Schema;
+import mil.nga.giat.osm.types.TypeUtils;
+import mil.nga.giat.osm.types.generated.LongArray;
 
 
 public class OSMMapperBase<T> extends Mapper<AvroKey<T>, NullWritable, Text, Mutation> {
@@ -26,12 +24,12 @@ public class OSMMapperBase<T> extends Mapper<AvroKey<T>, NullWritable, Text, Mut
     private static final Logger log = LoggerFactory.getLogger(OSMMapperBase.class);
 
 
-    protected final BasicWriter.LongWriter _longWriter = new BasicWriter.LongWriter();
-    protected final BasicWriter.IntWriter _intWriter = new BasicWriter.IntWriter();
-    protected final BasicWriter.StringWriter _stringWriter = new BasicWriter.StringWriter();
-    protected final BasicWriter.DoubleWriter _doubleWriter = new BasicWriter.DoubleWriter();
-    protected final BasicWriter.BooleanWriter _booleanWriter = new BasicWriter.BooleanWriter();
-    protected final BasicWriter.CalendarWriter _calendarWriter = new BasicWriter.CalendarWriter();
+    protected final FieldWriter<?, Long> longWriter = FieldUtils.getDefaultWriterForClass(Long.class);
+    protected final FieldWriter<?, Integer> intWriter = FieldUtils.getDefaultWriterForClass(Integer.class);
+    protected final FieldWriter<?, String> stringWriter = FieldUtils.getDefaultWriterForClass(String.class);
+    protected final FieldWriter<?, Double> doubleWriter = FieldUtils.getDefaultWriterForClass(Double.class);
+    protected final FieldWriter<?, Boolean> booleanWriter = FieldUtils.getDefaultWriterForClass(Boolean.class);
+    protected final FieldWriter<?, Calendar> calendarWriter = FieldUtils.getDefaultWriterForClass(Calendar.class);
 
     protected ColumnVisibility _visibility = new ColumnVisibility("public".getBytes(Schema.CHARSET));
 
@@ -43,43 +41,43 @@ public class OSMMapperBase<T> extends Mapper<AvroKey<T>, NullWritable, Text, Mut
 
     protected void put(Mutation m, byte[] cf, byte[] cq, Long val) {
 		if (val != null) {
-			m.put(cf, cq, _visibility, _longWriter.writeField(val));
+			m.put(cf, cq, _visibility, longWriter.writeField(val));
 		}
     }
 
     protected void put(Mutation m, byte[] cf, byte[] cq, Integer val) {
 		if (val != null) {
-			m.put(cf, cq, _visibility, _intWriter.writeField(val));
+			m.put(cf, cq, _visibility, intWriter.writeField(val));
 		}
     }
 
     protected void put(Mutation m, byte[] cf, byte[] cq, Double val) {
 		if (val != null) {
-			m.put(cf, cq, _visibility, _doubleWriter.writeField(val));
+			m.put(cf, cq, _visibility, doubleWriter.writeField(val));
 		}
     }
 
     protected void put(Mutation m, byte[] cf, byte[] cq, String val) {
 		if (val != null) {
-			m.put(cf, cq, _visibility, _stringWriter.writeField(val));
+			m.put(cf, cq, _visibility, stringWriter.writeField(val));
 		}
     }
 
 	protected void put(Mutation m, byte[] cf, byte[] cq, CharSequence val) {
 		if (val != null) {
-			m.put(cf, cq, _visibility, _stringWriter.writeField(val.toString()));
+			m.put(cf, cq, _visibility, stringWriter.writeField(val.toString()));
 		}
 	}
 
     protected void put(Mutation m, byte[] cf, byte[] cq, Boolean val) {
 		if (val != null) {
-			m.put(cf, cq, _visibility, _booleanWriter.writeField(val));
+			m.put(cf, cq, _visibility, booleanWriter.writeField(val));
 		}
     }
 
     protected void put(Mutation m, byte[] cf, byte[] cq, Calendar val) {
 		if (val != null) {
-			m.put(cf, cq, _visibility, _calendarWriter.writeField(val));
+			m.put(cf, cq, _visibility, calendarWriter.writeField(val));
 		}
     }
 

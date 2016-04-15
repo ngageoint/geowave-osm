@@ -1,35 +1,40 @@
 package mil.nga.giat.osm.parser;
 
-import mil.nga.giat.osm.OSMCommandArgs;
-import mil.nga.giat.osm.types.generated.*;
-import org.apache.avro.file.CodecFactory;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.specific.SpecificDatumWriter;
-import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.SequenceFile;
-import org.openstreetmap.osmosis.osmbinary.BinaryParser;
-import org.openstreetmap.osmosis.osmbinary.Fileformat;
-import org.openstreetmap.osmosis.osmbinary.Osmformat;
-import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
-import org.openstreetmap.osmosis.osmbinary.file.BlockReaderAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.nio.file.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.avro.file.CodecFactory;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.openstreetmap.osmosis.osmbinary.BinaryParser;
+import org.openstreetmap.osmosis.osmbinary.Osmformat;
+import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import mil.nga.giat.osm.OSMCommandArgs;
+import mil.nga.giat.osm.types.generated.MemberType;
+import mil.nga.giat.osm.types.generated.Node;
+import mil.nga.giat.osm.types.generated.Primitive;
+import mil.nga.giat.osm.types.generated.Relation;
+import mil.nga.giat.osm.types.generated.RelationMember;
+import mil.nga.giat.osm.types.generated.Way;
 
 public class OsmPbfParser
 {

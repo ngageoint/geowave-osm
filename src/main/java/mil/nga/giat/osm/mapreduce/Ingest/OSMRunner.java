@@ -1,11 +1,5 @@
 package mil.nga.giat.osm.mapreduce.Ingest;
 
-import com.beust.jcommander.JCommander;
-import mil.nga.giat.geowave.accumulo.BasicAccumuloOperations;
-import mil.nga.giat.osm.accumulo.osmschema.Schema;
-import mil.nga.giat.osm.types.generated.Node;
-import mil.nga.giat.osm.types.generated.Relation;
-import mil.nga.giat.osm.types.generated.Way;
 import org.apache.accumulo.core.client.AccumuloException;
 import org.apache.accumulo.core.client.AccumuloSecurityException;
 import org.apache.accumulo.core.client.ClientConfiguration;
@@ -25,6 +19,14 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.beust.jcommander.JCommander;
+
+import mil.nga.giat.geowave.datastore.accumulo.BasicAccumuloOperations;
+import mil.nga.giat.osm.accumulo.osmschema.Schema;
+import mil.nga.giat.osm.types.generated.Node;
+import mil.nga.giat.osm.types.generated.Relation;
+import mil.nga.giat.osm.types.generated.Way;
 
 
 public class OSMRunner

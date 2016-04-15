@@ -1,122 +1,192 @@
 package mil.nga.giat.osm.mapreduce.Convert;
 
-import com.beust.jcommander.JCommander;
-import mil.nga.giat.geowave.accumulo.mapreduce.input.GeoWaveInputFormat;
-import mil.nga.giat.geowave.accumulo.mapreduce.output.GeoWaveOutputFormat;
-import mil.nga.giat.geowave.accumulo.mapreduce.output.GeoWaveOutputKey;
-import mil.nga.giat.geowave.accumulo.metadata.AccumuloAdapterStore;
-import mil.nga.giat.geowave.index.ByteArrayUtils;
-import mil.nga.giat.geowave.index.PersistenceUtils;
-import mil.nga.giat.geowave.index.StringUtils;
-import mil.nga.giat.geowave.ingest.hdfs.mapreduce.AbstractMapReduceIngest;
-import mil.nga.giat.geowave.store.adapter.AdapterStore;
-import mil.nga.giat.geowave.store.adapter.WritableDataAdapter;
-import mil.nga.giat.geowave.store.index.Index;
-import mil.nga.giat.geowave.store.index.IndexType;
-import mil.nga.giat.geowave.vector.adapter.FeatureDataAdapter;
-import mil.nga.giat.osm.accumulo.osmschema.Schema;
-import mil.nga.giat.osm.mapreduce.Ingest.OSMMapperCommandArgs;
-import mil.nga.giat.osm.osmfeature.types.features.FeatureDefinitionSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.accumulo.core.client.ClientConfiguration;
 import org.apache.accumulo.core.client.IteratorSetting;
+import org.apache.accumulo.core.client.mapreduce.AbstractInputFormat;
 import org.apache.accumulo.core.client.mapreduce.AccumuloInputFormat;
+import org.apache.accumulo.core.client.mapreduce.InputFormatBase;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.iterators.user.WholeRowIterator;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.util.Pair;
-import org.apache.avro.mapreduce.AvroJob;
-import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.opengis.feature.simple.SimpleFeature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import com.beust.jcommander.JCommander;
 
-public class OSMConversionRunner
-		extends Configured
-		implements Tool
+import mil.nga.giat.geowave.adapter.vector.FeatureDataAdapter;
+import mil.nga.giat.geowave.core.geotime.ingest.SpatialDimensionalityTypeProvider;
+import mil.nga.giat.geowave.core.index.StringUtils;
+import mil.nga.giat.geowave.core.ingest.hdfs.mapreduce.AbstractMapReduceIngest;
+import mil.nga.giat.geowave.core.store.adapter.AdapterStore;
+import mil.nga.giat.geowave.core.store.index.PrimaryIndex;
+import mil.nga.giat.geowave.datastore.accumulo.BasicAccumuloOperations;
+import mil.nga.giat.geowave.datastore.accumulo.metadata.AccumuloAdapterStore;
+import mil.nga.giat.geowave.mapreduce.output.GeoWaveOutputFormat;
+import mil.nga.giat.geowave.mapreduce.output.GeoWaveOutputKey;
+import mil.nga.giat.osm.mapreduce.Ingest.OSMMapperCommandArgs;
+import mil.nga.giat.osm.osmfeature.types.features.FeatureDefinitionSet;
+
+public class OSMConversionRunner extends
+		Configured implements
+		Tool
 {
-	private static final Logger LOGGER  = LoggerFactory.getLogger(OSMConversionRunner.class);
 
-	public static void main(String[] args) throws Exception {
-		int res = ToolRunner.run(new Configuration(), new OSMConversionRunner(), args);
-		System.exit(res);
+	public static void main(
+			final String[] args )
+			throws Exception {
+		final int res = ToolRunner.run(
+				new Configuration(),
+				new OSMConversionRunner(),
+				args);
+		System.exit(
+				res);
 	}
 
-
 	@Override
-	public int run(String[] args) throws Exception {
+	public int run(
+			final String[] args )
+			throws Exception {
 
-		OSMMapperCommandArgs argv = new OSMMapperCommandArgs();
-		new JCommander(argv, args);
-		Configuration conf = this.getConf();
+		final OSMMapperCommandArgs argv = new OSMMapperCommandArgs();
+		new JCommander(
+				argv,
+				args);
+		final Configuration conf = getConf();
 
+		// job settings
 
+		final Job job = Job.getInstance(
+				conf,
+				argv.jobName + "NodeConversion");
+		job.setJarByClass(
+				OSMConversionRunner.class);
 
-		//job settings
+		job.getConfiguration().set(
+				"osm_mapping",
+				argv.getMappingContents());
+		job.getConfiguration().set(
+				"arguments",
+				argv.serializeToString());
 
-		Job job = Job.getInstance(conf, argv.jobName + "NodeConversion");
-		job.setJarByClass(OSMConversionRunner.class);
-
-        job.getConfiguration().set("osm_mapping", argv.getMappingContents());
-        job.getConfiguration().set("arguments", argv.serializeToString());
-
-        if (argv.visibility != null) {
-            job.getConfiguration().set(
-                    AbstractMapReduceIngest.GLOBAL_VISIBILITY_KEY,
-                    argv.visibility);
-        }
-
-		//input format
-
-		AccumuloInputFormat.setConnectorInfo(job, argv.user, new PasswordToken(argv.pass));
-		AccumuloInputFormat.setInputTableName(job, argv.getQualifiedTableName());
-		AccumuloInputFormat.setZooKeeperInstance(job, new ClientConfiguration().withInstance(argv.instanceName).withZkHosts(argv.zookeepers));
-		AccumuloInputFormat.setScanAuthorizations(job, new Authorizations(argv.visibility));
-
-		IteratorSetting is = new IteratorSetting(50, "WholeRow", WholeRowIterator.class);
-		AccumuloInputFormat.addIterator(job,is);
-		job.setInputFormatClass(AccumuloInputFormat.class);
-		Range r = new Range();
-		ArrayList<Pair<Text, Text>> columns = new ArrayList<>();
-		AccumuloInputFormat.setRanges(job, Arrays.asList(r));
-
-		//output format
-		GeoWaveOutputFormat.setAccumuloOperationsInfo(job, argv.zookeepers, argv.instanceName, argv.user, argv.pass, argv.osmNamespace);
-
-		AdapterStore as = new AccumuloAdapterStore(GeoWaveOutputFormat.getAccumuloOperations(job));
-		for (FeatureDataAdapter fda : FeatureDefinitionSet.featureAdapters.values()){
-			as.addAdapter(fda);
-			GeoWaveOutputFormat.addDataAdapter(job.getConfiguration(), fda);
+		if (argv.visibility != null) {
+			job.getConfiguration().set(
+					AbstractMapReduceIngest.GLOBAL_VISIBILITY_KEY,
+					argv.visibility);
 		}
 
-		Index primaryIndex = IndexType.SPATIAL_RASTER.createDefaultIndex();
-		GeoWaveOutputFormat.addIndex(job.getConfiguration(), primaryIndex);
-		job.getConfiguration().set(AbstractMapReduceIngest.PRIMARY_INDEX_ID_KEY,
-                StringUtils.stringFromBinary(primaryIndex.getId().getBytes()));
+		// input format
 
-		job.setOutputFormatClass(GeoWaveOutputFormat.class);
-		job.setMapOutputKeyClass(GeoWaveOutputKey.class);
-		job.setMapOutputValueClass(SimpleFeature.class);
+		AbstractInputFormat.setConnectorInfo(
+				job,
+				argv.user,
+				new PasswordToken(
+						argv.pass));
+		InputFormatBase.setInputTableName(
+				job,
+				argv.getQualifiedTableName());
+		AbstractInputFormat.setZooKeeperInstance(
+				job,
+				new ClientConfiguration().withInstance(
+						argv.instanceName).withZkHosts(
+								argv.zookeepers));
+		AbstractInputFormat.setScanAuthorizations(
+				job,
+				new Authorizations(
+						argv.visibility));
 
-		//mappper
+		final IteratorSetting is = new IteratorSetting(
+				50,
+				"WholeRow",
+				WholeRowIterator.class);
+		InputFormatBase.addIterator(
+				job,
+				is);
+		job.setInputFormatClass(
+				AccumuloInputFormat.class);
+		final Range r = new Range();
+		final ArrayList<Pair<Text, Text>> columns = new ArrayList<>();
+		InputFormatBase.setRanges(
+				job,
+				Arrays.asList(
+						r));
 
-		job.setMapperClass(OSMConversionMapper.class);
+		// output format
+		GeoWaveOutputFormat.setDataStoreName(
+				job.getConfiguration(),
+				"accumulo");
+		final Map<String, String> storeConfigOptions = new HashMap<String, String>();
+		storeConfigOptions.put(
+				BasicAccumuloOperations.ZOOKEEPER_CONFIG_NAME,
+				argv.zookeepers);
+		storeConfigOptions.put(
+				BasicAccumuloOperations.INSTANCE_CONFIG_NAME,
+				argv.instanceName);
+		storeConfigOptions.put(
+				BasicAccumuloOperations.USER_CONFIG_NAME,
+				argv.user);
+		storeConfigOptions.put(
+				BasicAccumuloOperations.PASSWORD_CONFIG_NAME,
+				argv.pass);
+		GeoWaveOutputFormat.setStoreConfigOptions(
+				job.getConfiguration(),
+				storeConfigOptions);
+		GeoWaveOutputFormat.setGeoWaveNamespace(
+				job.getConfiguration(),
+				"");
 
-		//reducer
-		job.setNumReduceTasks(0);
+		final AdapterStore as = new AccumuloAdapterStore(
+				new BasicAccumuloOperations(
+						argv.zookeepers,
+						argv.instanceName,
+						argv.user,
+						argv.pass,
+						argv.osmNamespace));
+		for (final FeatureDataAdapter fda : FeatureDefinitionSet.featureAdapters.values()) {
+			as.addAdapter(
+					fda);
+			GeoWaveOutputFormat.addDataAdapter(
+					job.getConfiguration(),
+					fda);
+		}
 
+		final PrimaryIndex primaryIndex = new SpatialDimensionalityTypeProvider().createPrimaryIndex();
+		GeoWaveOutputFormat.addIndex(
+				job.getConfiguration(),
+				primaryIndex);
+		job.getConfiguration().set(
+				AbstractMapReduceIngest.PRIMARY_INDEX_IDS_KEY,
+				StringUtils.stringFromBinary(
+						primaryIndex.getId().getBytes()));
 
-		return job.waitForCompletion(true) ? 0 : -1;
+		job.setOutputFormatClass(
+				GeoWaveOutputFormat.class);
+		job.setMapOutputKeyClass(
+				GeoWaveOutputKey.class);
+		job.setMapOutputValueClass(
+				SimpleFeature.class);
+
+		// mappper
+
+		job.setMapperClass(
+				OSMConversionMapper.class);
+
+		// reducer
+		job.setNumReduceTasks(
+				0);
+
+		return job.waitForCompletion(
+				true) ? 0 : -1;
 	}
 }

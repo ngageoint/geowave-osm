@@ -1,13 +1,16 @@
 package mil.nga.giat.osm.mapreduce.Ingest;
 
-import mil.nga.giat.osm.accumulo.osmschema.Schema;
-import mil.nga.giat.osm.types.generated.*;
+import java.io.IOException;
+import java.util.Map;
+
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.hadoop.io.NullWritable;
 
-import java.io.IOException;
-import java.util.Map;
+import mil.nga.giat.osm.accumulo.osmschema.Schema;
+import mil.nga.giat.osm.types.generated.Primitive;
+import mil.nga.giat.osm.types.generated.Relation;
+import mil.nga.giat.osm.types.generated.RelationMember;
 
 /**
  *

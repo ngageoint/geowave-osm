@@ -1,13 +1,12 @@
 package mil.nga.giat.osm.osmfeature.types.attributes;
 
-import com.vividsolutions.jts.geom.Geometry;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.vividsolutions.jts.geom.Geometry;
 
 public class AttributeTypes
 {

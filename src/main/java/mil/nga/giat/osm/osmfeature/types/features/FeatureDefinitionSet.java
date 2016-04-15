@@ -1,29 +1,30 @@
 package mil.nga.giat.osm.osmfeature.types.features;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import mil.nga.giat.geowave.index.StringUtils;
-import mil.nga.giat.geowave.vector.adapter.FeatureDataAdapter;
-import mil.nga.giat.osm.osmfeature.FeatureConfigParser;
-import mil.nga.giat.osm.osmfeature.types.attributes.AttributeDefinition;
-import mil.nga.giat.osm.osmfeature.types.attributes.AttributeType;
-import mil.nga.giat.osm.osmfeature.types.attributes.AttributeTypes;
-import org.apache.commons.io.IOUtils;
-import org.geotools.feature.AttributeTypeBuilder;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+import org.geotools.feature.AttributeTypeBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
+import mil.nga.giat.geowave.adapter.vector.FeatureDataAdapter;
+import mil.nga.giat.geowave.core.index.StringUtils;
+import mil.nga.giat.osm.osmfeature.FeatureConfigParser;
+import mil.nga.giat.osm.osmfeature.types.attributes.AttributeDefinition;
+import mil.nga.giat.osm.osmfeature.types.attributes.AttributeType;
+import mil.nga.giat.osm.osmfeature.types.attributes.AttributeTypes;
 
 public class FeatureDefinitionSet {
 	public final static List<String> GeneralizedFeatures = new ArrayList<>();
@@ -38,7 +39,7 @@ public class FeatureDefinitionSet {
 		synchronized (MUTEX) {
 			if (!initialized) {
 				FeatureConfigParser fcp = new FeatureConfigParser();
-				ByteArrayInputStream bais = new ByteArrayInputStream(configFile.getBytes(StringUtils.UTF8_CHAR_SET));
+				ByteArrayInputStream bais = new ByteArrayInputStream(configFile.getBytes(StringUtils.GEOWAVE_CHAR_SET));
 				try {
 					fcp.parseConfig(bais);
 				}

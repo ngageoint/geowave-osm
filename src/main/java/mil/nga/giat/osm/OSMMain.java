@@ -1,9 +1,9 @@
 package mil.nga.giat.osm;
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
-import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 
 /**
  * Entry point for OSM operations

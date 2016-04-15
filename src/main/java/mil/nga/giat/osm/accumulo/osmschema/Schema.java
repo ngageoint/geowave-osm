@@ -2,12 +2,13 @@ package mil.nga.giat.osm.accumulo.osmschema;
 
 
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-import org.apache.accumulo.core.data.ByteSequence;
-
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+
+import org.apache.accumulo.core.data.ByteSequence;
+
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 
 public class Schema {
     public static Charset CHARSET = StandardCharsets.UTF_8;

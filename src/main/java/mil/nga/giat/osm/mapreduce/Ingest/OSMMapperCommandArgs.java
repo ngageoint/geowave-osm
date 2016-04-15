@@ -1,13 +1,14 @@
 package mil.nga.giat.osm.mapreduce.Ingest;
 
-import com.beust.jcommander.Parameter;
-import mil.nga.giat.geowave.accumulo.util.AccumuloUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.regex.Pattern;
+
+import com.beust.jcommander.Parameter;
+
+import mil.nga.giat.geowave.datastore.accumulo.util.AccumuloUtils;
 
 public class OSMMapperCommandArgs {
 

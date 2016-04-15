@@ -1,6 +1,5 @@
 package mil.nga.giat.osm;
 
-import mil.nga.giat.geowave.accumulo.BasicAccumuloOperations;
 import mil.nga.giat.geowave.test.GeoWaveDFSTestEnvironment;
 import mil.nga.giat.osm.mapreduce.Convert.OSMConversionRunner;
 import mil.nga.giat.osm.mapreduce.Ingest.OSMMapperCommandArgs;

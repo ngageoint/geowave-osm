@@ -1,25 +1,42 @@
 package mil.nga.giat.osm.mapreduce.Convert.OsmProvider;
 
-import com.google.common.base.Joiner;
-import com.vividsolutions.jts.geom.*;
-import mil.nga.giat.geowave.store.GeometryUtils;
-import mil.nga.giat.geowave.store.data.field.BasicReader;
-import mil.nga.giat.geowave.store.data.field.BasicWriter;
-import mil.nga.giat.osm.accumulo.osmschema.Schema;
-import mil.nga.giat.osm.mapreduce.Convert.SimpleFeatureGenerator;
-import mil.nga.giat.osm.mapreduce.Ingest.OSMMapperCommandArgs;
-import mil.nga.giat.osm.osmfeature.types.features.FeatureDefinition;
-import mil.nga.giat.osm.types.TypeUtils;
-import org.apache.accumulo.core.client.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.accumulo.core.client.AccumuloException;
+import org.apache.accumulo.core.client.AccumuloSecurityException;
+import org.apache.accumulo.core.client.BatchScanner;
+import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.client.TableNotFoundException;
+import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
-import org.apache.accumulo.core.data.*;
+import org.apache.accumulo.core.data.ByteSequence;
+import org.apache.accumulo.core.data.Key;
+import org.apache.accumulo.core.data.Range;
+import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.*;
+import com.google.common.base.Joiner;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Polygon;
+import mil.nga.giat.geowave.core.geotime.GeometryUtils;
+import mil.nga.giat.geowave.core.store.data.field.FieldReader;
+import mil.nga.giat.geowave.core.store.data.field.FieldUtils;
+import mil.nga.giat.geowave.core.store.data.field.FieldWriter;
+import mil.nga.giat.osm.accumulo.osmschema.Schema;
+import mil.nga.giat.osm.mapreduce.Convert.SimpleFeatureGenerator;
+import mil.nga.giat.osm.mapreduce.Ingest.OSMMapperCommandArgs;
+import mil.nga.giat.osm.osmfeature.types.features.FeatureDefinition;
+import mil.nga.giat.osm.types.TypeUtils;
 
 public class OsmProvider
 {
@@ -28,9 +45,9 @@ public class OsmProvider
 	private Connector conn = null;
 	private OSMMapperCommandArgs args;
 	private BatchScanner bs = null;
-	private final BasicWriter.LongWriter longWriter = new BasicWriter.LongWriter();
-	private final BasicReader.LongReader longReader = new BasicReader.LongReader();
-	private final BasicReader.DoubleReader doubleReader = new BasicReader.DoubleReader();
+	private final FieldWriter<?, Long> longWriter = FieldUtils.getDefaultWriterForClass(Long.class);
+	private final FieldReader<Long> longReader = FieldUtils.getDefaultReaderForClass(Long.class);
+	private final FieldReader<Double> doubleReader = FieldUtils.getDefaultReaderForClass(Double.class);
 	private static final byte EMPTY_BYTES[] = new byte[0];
 
 	public OsmProvider(OSMMapperCommandArgs args)

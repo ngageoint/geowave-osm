@@ -1,18 +1,24 @@
 package mil.nga.giat.osm.osmfeature;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import mil.nga.giat.osm.osmfeature.types.attributes.AttributeDefinition;
 import mil.nga.giat.osm.osmfeature.types.features.FeatureDefinition;
 import mil.nga.giat.osm.osmfeature.types.features.FeatureDefinitionSet;
 import mil.nga.giat.osm.osmfeature.types.features.FeatureType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
 
 public class FeatureConfigParser
 {
